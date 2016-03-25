@@ -1,0 +1,29 @@
+ACLARACION FORMATO ONDAS
+----------------------------------------------
+Componenete -> Color
+-----------------------
+Banco_IF_ID -> Dorado
+Banco_ID_EX -> Rosa
+Banco_EX_MEM -> Naranja
+Banco_MEM_WB -> Azul
+
+Demas componentes -> Verde
+
+Grupos de seniales
+------------------------
+PC: Seniales que afectan al PC
+Banco_IF_ID: Seniales del banco de registros que separa las etapas FETCH y DECODE
+BR: Seniales del banco de registros
+Banco_ID_EX: Seniales del banco de registros que
+separa las etapas DECODE y EXECUTION.
+ALU: Seniales de la ALU
+Banco_EX_MEM: Seniales del banco de registros que separa las etapas de EXECUTION y MEMORY.
+Mem_D: Seniales de la memoria de datos.
+Banco_MEM_WB: Seniales del banco de registros que
+separa las etapas MEMORY y WRITE BACK
+
+Nota: En los bancos que separan etapas, solo se han puesto las seniales que van hacia la
+siguiente etapa ya que para las de la etapa anterior, se tienen las del componente.
+
+Ej: En BANCO_ID_EX ponemos las que salen hacia EX ya que las que hay en la etapa DECODE
+son las del BR.
