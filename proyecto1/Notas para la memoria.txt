@@ -1,0 +1,12 @@
+Autor: Daniel Rueda Macias
+
+
+NOTAS PARA MEMORIA
+=============================================================================
+Instrucciones pre-incremento
+-----------------------------------
+Se ha propagado RA (RS) hasta el banco de registros EX_MEM. Se ha añadido al banco de registros un nuevo bus
+que por el que se introducira el dato incrementado y un nuevo puerto de escritura que indica el registro en el que
+hay que escribir dicho incremento. En consecuencia tambien se ha añadido una señal de control para controlar esta escritura.
+
+La salida de la ALU (ALU_out_MEM) se ha conectado al bus nuevo y la propagacion del registro RA (RS_MEM) al puerto de escritura RS.
