@@ -41,7 +41,10 @@ port (
         RB : in std_logic_vector (4 downto 0); --Dir para el puerto de lectura A
         RW : in std_logic_vector (4 downto 0); --Dir para el puerto de escritura
         BusW : in std_logic_vector (31 downto 0);--entrada de datos para el puerto de escritura
-        RegWrite : in std_logic;						
+        RS : in std_logic_vector (4 downto 0); --Dir para el puerto de escritura de RS en las pre-incremento
+        BusRS : in std_logic_vector (31 downto 0);--entrada de datos para las instrucciones pre-incremento
+        RegWrite : in std_logic;
+        Update_Rs : in std_logic;--senial de control para la escritura de RS en las instrucciones pre-incremento						
         BusA : out std_logic_vector (31 downto 0);
         BusB : out std_logic_vector (31 downto 0)
     );
@@ -65,6 +68,9 @@ architecture Behavioral of BReg is
 					if RegWrite = '1' then
 						 reg_file(conv_integer(RW)) <= BusW; --forma super compacta de vhdl para hacer el decodificador y la escritura en el banco de registros
 						 end if;
+                    if Update_Rs = '1' then
+                         reg_file(conv_integer(RS)) <= BusRS; --introducimos el dato que a escribir en RS
+                        end if;
 					end if;
 				end if;
     end process;

@@ -95,7 +95,10 @@ COMPONENT BReg
          RB : IN  std_logic_vector(4 downto 0);
          RW : IN  std_logic_vector(4 downto 0);
          BusW : IN  std_logic_vector(31 downto 0);
+         RS : in std_logic_vector (4 downto 0); --Dir para el puerto de escritura de RS en las pre-incremento
+         BusRS : in std_logic_vector (31 downto 0);--entrada de datos para las instrucciones pre-incremento
          RegWrite : IN  std_logic;
+         Update_Rs : in std_logic;--senial de control para la escritura de RS en las instrucciones pre-incremento
          BusA : OUT  std_logic_vector(31 downto 0);
          BusB : OUT  std_logic_vector(31 downto 0)
         );
@@ -119,7 +122,8 @@ component UC is
            MemWrite : out  STD_LOGIC;
            MemRead : out  STD_LOGIC;
            MemtoReg : out  STD_LOGIC;
-           RegWrite : out  STD_LOGIC);
+           RegWrite : out  STD_LOGIC;
+           Update_Rs : out STD_LOGIC);
 end component;
 
 COMPONENT Banco_EX
@@ -147,6 +151,10 @@ COMPONENT Banco_EX
          RegWrite_EX : OUT  std_logic;
 		 ALUctrl_ID: in STD_LOGIC_VECTOR (2 downto 0);
 		 ALUctrl_EX: out STD_LOGIC_VECTOR (2 downto 0);
+         RS_ID : in STD_LOGIC_VECTOR (4 downto 0);
+         RS_EX : out STD_LOGIC_VECTOR (4 downto 0);
+         Update_Rs_ID : in STD_LOGIC;
+         Update_Rs_EX : out STD_LOGIC;
          Reg_Rt_ID : IN  std_logic_vector(4 downto 0);
          Reg_Rd_ID : IN  std_logic_vector(4 downto 0);
          Reg_Rt_EX : OUT  std_logic_vector(4 downto 0);
@@ -187,6 +195,10 @@ COMPONENT Banco_MEM
          RegWrite_MEM : OUT  std_logic;
          BusB_EX : IN  std_logic_vector(31 downto 0);
          BusB_MEM : OUT  std_logic_vector(31 downto 0);
+         RS_EX : in STD_LOGIC_VECTOR (4 downto 0);
+         RS_MEM : out STD_LOGIC_VECTOR (4 downto 0);
+         Update_Rs_EX : in STD_LOGIC;
+         Update_Rs_MEM : out STD_LOGIC;
          RW_EX : IN  std_logic_vector(4 downto 0);
          RW_MEM : OUT  std_logic_vector(4 downto 0)
         );
@@ -212,9 +224,10 @@ COMPONENT Banco_MEM
 
 signal load_PC, PCSrc, RegWrite_ID, RegWrite_EX, RegWrite_MEM, RegWrite_WB, Z, Branch, RegDst_ID, RegDst_EX, ALUSrc_ID, ALUSrc_EX: std_logic;
 signal MemtoReg_ID, MemtoReg_EX, MemtoReg_MEM, MemtoReg_WB, MemWrite_ID, MemWrite_EX, MemWrite_MEM, MemRead_ID, MemRead_EX, MemRead_MEM: std_logic;
+signal Update_Rs_ID, Update_Rs_EX, Update_Rs_MEM: std_logic;
 signal PC_in, PC_out, four, PC4, Dirsalto_ID, IR_in, IR_ID, PC4_ID, inm_ext_EX, Mux_out : std_logic_vector(31 downto 0);
 signal BusW, BusA, BusB, BusA_EX, BusB_EX, BusB_MEM, inm_ext, inm_ext_x4, ALU_out_EX, ALU_out_MEM, ALU_out_WB, Mem_out, MDR : std_logic_vector(31 downto 0);
-signal RW_EX, RW_MEM, RW_WB, Reg_Rd_EX, Reg_Rt_EX: std_logic_vector(4 downto 0);
+signal RW_EX, RW_MEM, RW_WB, Reg_Rd_EX, Reg_Rt_EX, RS_EX, RS_MEM: std_logic_vector(4 downto 0);
 signal ALUctrl_ID, ALUctrl_EX : std_logic_vector(2 downto 0);
 begin
 pc: reg32 port map (	Din => PC_in, clk => clk, reset => reset, load => load_PC, Dout => PC_out);
@@ -241,7 +254,7 @@ Banco_IF_ID: Banco_ID port map (	IR_in => IR_in, PC4_in => PC4, clk => clk, rese
 ------------------------------------------Etapa ID-------------------------------------------------------------------
 -- Hay que añadir un nuevo puerto de escritura al banco de registros
 Register_bank: BReg PORT MAP (clk => clk, reset => reset, RA => IR_ID(25 downto 21), RB => IR_ID(20 downto 16), RW => RW_WB, BusW => BusW, 
-									RegWrite => RegWrite_WB, BusA => BusA, BusB => BusB);
+									RegWrite => RegWrite_WB, BusA => BusA, BusB => BusB, RS => RS_MEM, BusRS => ALU_out_MEM, Update_Rs => Update_Rs_MEM);
 -------------------------------------------------------------------------------------
 sign_ext: Ext_signo port map (inm => IR_ID(15 downto 0), inm_ext => inm_ext);
 
@@ -256,7 +269,7 @@ Z <= '1' when (busA=busB) else '0';
 -------------------------------------------------------------------------------------
 -- Deberéis incluir la nueva señal Update_Rs en la unidad de control
 UC_seg: UC port map (IR_op_code => IR_ID(31 downto 26), Branch => Branch, RegDst => RegDst_ID,  ALUSrc => ALUSrc_ID, MemWrite => MemWrite_ID,  
-							MemRead => MemRead_ID, MemtoReg => MemtoReg_ID, RegWrite => RegWrite_ID);
+							MemRead => MemRead_ID, MemtoReg => MemtoReg_ID, RegWrite => RegWrite_ID, Update_Rs => Update_Rs_ID);
 -------------------------------------------------------------------------------------
 -- Ahora mismo sólo esta implementada la instrucción de salto BEQ. Si es una instrucción de salto y se activa la señal Z se carga la dirección de salto, sino PC+4 	
 PCSrc <= Branch AND Z; 				
@@ -270,7 +283,8 @@ Banco_ID_EX: Banco_EX PORT MAP ( clk => clk, reset => reset, load => '1', busA =
 											MemtoReg_ID => MemtoReg_ID, RegWrite_ID => RegWrite_ID, RegDst_EX => RegDst_EX, ALUSrc_EX => ALUSrc_EX,
 											MemWrite_EX => MemWrite_EX, MemRead_EX => MemRead_EX, MemtoReg_EX => MemtoReg_EX, RegWrite_EX => RegWrite_EX,
 											ALUctrl_ID => ALUctrl_ID, ALUctrl_EX => ALUctrl_EX, inm_ext => inm_ext, inm_ext_EX=> inm_ext_EX,
-											Reg_Rt_ID => IR_ID(20 downto 16), Reg_Rd_ID => IR_ID(15 downto 11), Reg_Rt_EX => Reg_Rt_EX, Reg_Rd_EX => Reg_Rd_EX);			
+											Reg_Rt_ID => IR_ID(20 downto 16), Reg_Rd_ID => IR_ID(15 downto 11), Reg_Rt_EX => Reg_Rt_EX, Reg_Rd_EX => Reg_Rd_EX,
+                      RS_ID => IR_ID(25 downto 21), RS_EX => RS_EX, Update_Rs_ID => Update_Rs_ID, Update_Rs_EX => Update_Rs_EX);			
 							
 --
 ------------------------------------------Etapa EX-------------------------------------------------------------------
@@ -284,7 +298,8 @@ mux_dst: mux2_5bits port map (Din0 => Reg_Rt_EX, DIn1 => Reg_Rd_EX, ctrl => RegD
 -- hay que añadir los campos necesarios a los registros intermedios
 Banco_EX_MEM: Banco_MEM PORT MAP ( ALU_out_EX => ALU_out_EX, ALU_out_MEM => ALU_out_MEM, clk => clk, reset => reset, load => '1', MemWrite_EX => MemWrite_EX,
 												MemRead_EX => MemRead_EX, MemtoReg_EX => MemtoReg_EX, RegWrite_EX => RegWrite_EX, MemWrite_MEM => MemWrite_MEM, MemRead_MEM => MemRead_MEM,
-												MemtoReg_MEM => MemtoReg_MEM, RegWrite_MEM => RegWrite_MEM, BusB_EX => BusB_EX, BusB_MEM => BusB_MEM, RW_EX => RW_EX, RW_MEM => RW_MEM);
+												MemtoReg_MEM => MemtoReg_MEM, RegWrite_MEM => RegWrite_MEM, BusB_EX => BusB_EX, BusB_MEM => BusB_MEM, RW_EX => RW_EX, RW_MEM => RW_MEM,
+                        RS_EX => RS_EX, RS_MEM => RS_MEM, Update_Rs_EX => Update_Rs_EX, Update_Rs_MEM => Update_Rs_MEM);
 --
 ------------------------------------------Etapa MEM-------------------------------------------------------------------
 --
@@ -292,7 +307,7 @@ Banco_EX_MEM: Banco_MEM PORT MAP ( ALU_out_EX => ALU_out_EX, ALU_out_MEM => ALU_
 Mem_D: memoriaRAM_D PORT MAP (CLK => CLK, ADDR => ALU_out_MEM, Din => BusB_MEM, WE => MemWrite_MEM, RE => MemRead_MEM, Dout => Mem_out);
 -- hay que añadir los campos necesarios a los registros intermedios
 Banco_MEM_WB: Banco_WB PORT MAP ( ALU_out_MEM => ALU_out_MEM, ALU_out_WB => ALU_out_WB, Mem_out => Mem_out, MDR => MDR, clk => clk, reset => reset, load => '1', MemtoReg_MEM => MemtoReg_MEM, RegWrite_MEM => RegWrite_MEM, 
-											MemtoReg_WB => MemtoReg_WB, RegWrite_WB => RegWrite_WB, RW_MEM => RW_MEM, RW_WB => RW_WB );
+											MemtoReg_WB => MemtoReg_WB, RegWrite_WB => RegWrite_WB, RW_MEM => RW_MEM, RW_WB => RW_WB);
 mux_busW: mux2_1 port map (Din0 => ALU_out_WB, DIn1 => MDR, ctrl => MemtoReg_WB, Dout => busW);
 
 output <= IR_ID;

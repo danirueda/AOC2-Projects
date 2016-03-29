@@ -45,6 +45,10 @@ Port ( 	ALU_out_EX : in  STD_LOGIC_VECTOR (31 downto 0);
          RegWrite_MEM : out  STD_LOGIC;
          BusB_EX: in  STD_LOGIC_VECTOR (31 downto 0); -- para los store
 			BusB_MEM: out  STD_LOGIC_VECTOR (31 downto 0); -- para los store
+			RS_EX : in STD_LOGIC_VECTOR (4 downto 0);
+			RS_MEM : out STD_LOGIC_VECTOR (4 downto 0);
+			Update_Rs_EX : in STD_LOGIC;
+			Update_Rs_MEM : out STD_LOGIC;
 			RW_EX : in  STD_LOGIC_VECTOR (4 downto 0); -- registro destino de la escritura
          RW_MEM : out  STD_LOGIC_VECTOR (4 downto 0)); -- PC+4 en la etapa ID
 end Banco_MEM;
@@ -63,6 +67,8 @@ SYNC_PROC: process (clk)
 				MemRead_MEM <= '0';
 				MemtoReg_MEM <= '0';
 				RegWrite_MEM <= '0';
+				RS_MEM <= "00000";
+				Update_Rs_MEM <= '0';
          else
             if (load='1') then 
 					ALU_out_MEM <= ALU_out_EX;
@@ -72,6 +78,8 @@ SYNC_PROC: process (clk)
 					MemRead_MEM <= MemRead_EX;
 					MemtoReg_MEM <= MemtoReg_EX;
 					RegWrite_MEM <= RegWrite_EX;
+					RS_MEM <= RS_EX;
+					Update_Rs_MEM <= Update_Rs_EX;
 				end if;	
          end if;        
       end if;

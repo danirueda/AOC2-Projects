@@ -53,6 +53,10 @@ entity Banco_EX is
            RegWrite_EX : out  STD_LOGIC;
 			  ALUctrl_ID: in STD_LOGIC_VECTOR (2 downto 0);
 			  ALUctrl_EX: out STD_LOGIC_VECTOR (2 downto 0);
+			RS_ID : in STD_LOGIC_VECTOR (4 downto 0);
+			RS_EX : out STD_LOGIC_VECTOR (4 downto 0);
+			Update_Rs_ID : in STD_LOGIC;
+			Update_Rs_EX : out STD_LOGIC;
            Reg_Rt_ID : in  STD_LOGIC_VECTOR (4 downto 0);
            Reg_Rd_ID : in  STD_LOGIC_VECTOR (4 downto 0);
            Reg_Rt_EX : out  STD_LOGIC_VECTOR (4 downto 0);
@@ -78,6 +82,8 @@ SYNC_PROC: process (clk)
 				Reg_Rt_EX <= "00000";
 				Reg_Rd_EX <= "00000";
 				ALUctrl_EX <= "000";
+				RS_EX <= "00000";
+				Update_Rs_EX <= '0';
          else
             if (load='1') then 
 					busA_EX <= busA;
@@ -92,6 +98,8 @@ SYNC_PROC: process (clk)
 					Reg_Rd_EX <= Reg_Rd_ID;
 					ALUctrl_EX <= ALUctrl_ID;
 					inm_ext_EX <= inm_ext;
+					RS_EX <= RS_ID;
+					Update_Rs_EX <= Update_Rs_ID;
 				end if;	
          end if;        
       end if;
