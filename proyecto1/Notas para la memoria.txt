@@ -6,7 +6,21 @@ NOTAS PARA MEMORIA
 Instrucciones pre-incremento
 -----------------------------------
 Se ha propagado RA (RS) hasta el banco de registros EX_MEM. Se ha añadido al banco de registros un nuevo bus
-que por el que se introducira el dato incrementado y un nuevo puerto de escritura que indica el registro en el que
+que por el que se introducirá el dato incrementado y un nuevo puerto de escritura que indica el registro en el que
 hay que escribir dicho incremento. En consecuencia tambien se ha añadido una señal de control para controlar esta escritura.
 
 La salida de la ALU (ALU_out_MEM) se ha conectado al bus nuevo y la propagacion del registro RA (RS_MEM) al puerto de escritura RS.
+
+Gestión de riesgos de datos
+-------------------------------------
+Para programar este módulo, se consideran los siguientes riesgos:
+
+-Que nuestro RS esté en la etapa de ejecución y se vaya a escribir en el -> riesgo_rs_ex
+-Que nuestro RS esté en la etapa de memoria y se vaya a escribir en el -> riesgo_rs_mem
+-Que nuestro RS esté en la etapa de ejecución y se vaya a escribir en el en modo preincremento -> riesgo_rs_pre
+
+-Que nuestro RT esté en la etapa de ejecución y se vaya a escribir en el -> riesgo_rt_ex
+-Que nuestro RT esté en la etapa de memoria y se vaya a escribir en el -> riesgo_rt_mem
+-Que nuestro RT esté en la etapa de ejecución y se vaya a escribir en el en modo preincremento -> riesgo_rt_pre
+
+Si uno de estos riesgos de activa, hay que parar hasta que desaparezca.

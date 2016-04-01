@@ -6,8 +6,8 @@ add wave -noupdate -label load /testbench/uut/pc/load
 add wave -noupdate -group pc -label pc/Din /testbench/uut/pc/Din
 add wave -noupdate -group pc -label pc/Dout /testbench/uut/pc/Dout
 add wave -noupdate -label Mem_I/Dout /testbench/uut/Mem_I/Dout
-add wave -noupdate -group Banco_IF_ID -color Gold -label Banco_IF_ID/IR_ID /testbench/uut/Banco_IF_ID/IR_ID
-add wave -noupdate -group Banco_IF_ID -color Gold -label Banco_IF_ID/PC4_ID /testbench/uut/Banco_IF_ID/PC4_ID
+add wave -noupdate -expand -group Banco_IF_ID -color Gold -label Banco_IF_ID/IR_in /testbench/uut/Banco_IF_ID/IR_in
+add wave -noupdate -expand -group Banco_IF_ID -color Gold -label Banco_IF_ID/IR_ID /testbench/uut/Banco_IF_ID/IR_ID
 add wave -noupdate -group BR -label BR/reg_file /testbench/uut/Register_bank/reg_file
 add wave -noupdate -group BR -label BR/RA /testbench/uut/Register_bank/RA
 add wave -noupdate -group BR -label BR/RB /testbench/uut/Register_bank/RB
@@ -57,7 +57,7 @@ add wave -noupdate -group Banco_MEM_WB -color {Medium Blue} -label Banco_MEM_WB/
 add wave -noupdate -label mux_busW/ctrl /testbench/uut/mux_busW/ctrl
 add wave -noupdate -label mux_busW/Dout /testbench/uut/mux_busW/Dout
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {22 ns} 0}
+WaveRestoreCursors {{Cursor 1} {40 ns} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 173
 configure wave -valuecolwidth 100
@@ -73,4 +73,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {76 ns} {154 ns}
+WaveRestoreZoom {6 ns} {84 ns}

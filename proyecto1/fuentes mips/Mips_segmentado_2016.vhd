@@ -229,10 +229,12 @@ signal PC_in, PC_out, four, PC4, Dirsalto_ID, IR_in, IR_ID, PC4_ID, inm_ext_EX, 
 signal BusW, BusA, BusB, BusA_EX, BusB_EX, BusB_MEM, inm_ext, inm_ext_x4, ALU_out_EX, ALU_out_MEM, ALU_out_WB, Mem_out, MDR : std_logic_vector(31 downto 0);
 signal RW_EX, RW_MEM, RW_WB, Reg_Rd_EX, Reg_Rt_EX, RS_EX, RS_MEM: std_logic_vector(4 downto 0);
 signal ALUctrl_ID, ALUctrl_EX : std_logic_vector(2 downto 0);
+signal riesgo_rs_ex, riesgo_rs_mem, riesgo_rs_pre, riesgo_rt_ex, riesgo_rt_mem, riesgo_rt_pre, riesgos: std_logic; --Seniales para controlar los riesgos
+signal op_code_ID : std_logic_vector(31 downto 26);
 begin
 pc: reg32 port map (	Din => PC_in, clk => clk, reset => reset, load => load_PC, Dout => PC_out);
 ------------------------------------------------------------------------------------
-load_PC <= '1'; -- vale '1' porque en la versión actual el procesador no para nunca
+load_PC <= '1' when riesgos = '0' else '0'; --PC avanza si no hay riesgos, si los hay para.
 ------------------------------------------------------------------------------------
 four <= "00000000000000000000000000000100";
 
@@ -249,7 +251,8 @@ muxPC: mux2_1 port map (Din0 => PC4, DIn1 => Dirsalto_ID, ctrl => PCSrc, Dout =>
 Mem_I: memoriaRAM_I PORT MAP (CLK => CLK, ADDR => PC_out, Din => "00000000000000000000000000000000", WE => '0', RE => '1', Dout => IR_in);
 ------------------------------------------------------------------------------------
 -- hay que añadir los campos necesarios a los registros intermedios
-Banco_IF_ID: Banco_ID port map (	IR_in => IR_in, PC4_in => PC4, clk => clk, reset => reset, load => '1', IR_ID => IR_ID, PC4_ID => PC4_ID);
+--El banco sigue sacando datos si load_PC no ha parado
+Banco_IF_ID: Banco_ID port map (	IR_in => IR_in, PC4_in => PC4, clk => clk, reset => reset, load => load_PC, IR_ID => IR_ID, PC4_ID => PC4_ID);
 --
 ------------------------------------------Etapa ID-------------------------------------------------------------------
 -- Hay que añadir un nuevo puerto de escritura al banco de registros
@@ -265,10 +268,28 @@ adder_dir: adder32 port map (Din0 => inm_ext_x4, Din1 => PC4_ID, Dout => Dirsalt
 Z <= '1' when (busA=busB) else '0';
 
 ------------------------gestión de la parada en ID-----------------------------------
--- incluir aquí el código que detecta los riesgos de datos
+--Gestión de riesgos de datos
+
+--riesgos en rs
+riesgo_rs_ex <= '1' when (RegWrite_EX = '1' AND RW_EX = IR_ID(25 downto 21)) else '0';
+riesgo_rs_mem <= '1' when (RegWrite_MEM = '1' AND RW_MEM = IR_ID(25 downto 21)) else '0';
+riesgo_rs_pre <= '1' when (Update_Rs_EX = '1' AND RS_EX = IR_ID(25 downto 21)) else '0';
+
+--riesgos en rt
+riesgo_rt_ex <= '1' when (RegWrite_EX = '1' AND RW_EX = IR_ID(20 downto 16)) else '0';
+riesgo_rt_mem <= '1' when (RegWrite_MEM = '1' AND RW_MEM = IR_ID(20 downto 16)) else '0';
+riesgo_rt_pre <= '1' when (Update_Rs_EX = '1' AND RS_EX = IR_ID(20 downto 16)) else '0';
+
+riesgos <= '1' when (riesgo_rs_ex = '1' OR riesgo_rs_mem = '1' OR riesgo_rs_pre = '1' OR riesgo_rt_ex = '1' OR
+riesgo_rt_mem = '1' OR riesgo_rt_pre = '1') else '0';
+
+op_code_ID <= "000000" when riesgos = '1' else IR_ID(31 downto 26);
+
+
+
 -------------------------------------------------------------------------------------
 -- Deberéis incluir la nueva señal Update_Rs en la unidad de control
-UC_seg: UC port map (IR_op_code => IR_ID(31 downto 26), Branch => Branch, RegDst => RegDst_ID,  ALUSrc => ALUSrc_ID, MemWrite => MemWrite_ID,  
+UC_seg: UC port map (IR_op_code => op_code_ID, Branch => Branch, RegDst => RegDst_ID,  ALUSrc => ALUSrc_ID, MemWrite => MemWrite_ID,  
 							MemRead => MemRead_ID, MemtoReg => MemtoReg_ID, RegWrite => RegWrite_ID, Update_Rs => Update_Rs_ID);
 -------------------------------------------------------------------------------------
 -- Ahora mismo sólo esta implementada la instrucción de salto BEQ. Si es una instrucción de salto y se activa la señal Z se carga la dirección de salto, sino PC+4 	
