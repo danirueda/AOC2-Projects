@@ -1,0 +1,36 @@
+formato aritméticas: 
+op	rs	rt	rd	shamt	funct
+000001	00001	00010  	00011  	00000	000000  ADD R3, R1, R2
+
+formato lw, sw, beq:
+op	rs	rt		inm
+000010 	00000	00001 	0000000000000000 		LW  R1, 0(R0)  dir 0
+
+codigo inicial en la ram de instrucciones:
+El valor inicial de los registros es 0 (partimos de un reset) 
+El código está pensado para funcionar en un procesador con saltos 1-retardados que no detecta los riesgos de datos 
+Es un bucle infinito
+Como hacemos preincremento va recorriendo la memoria a partir de la posición 4 sumándole el contenido de la posición 0
+
+separado por campos:
+
+000010 	00000	00001 	0000000000000000 		LW  R1, 0(R0)  dir 0
+000110 	01000	00010 	0000000000000100 		LW_pre  R2, 4(R8)  dir 4
+000000	00000	00000	0000000000000000		nop
+000000	00000	00000	0000000000000000		nop
+000001	00001	00010  	00011  	00000	000000  ADD R3, R1, R2	       dir 16		
+000000	00000	00000	0000000000000000		nop
+queremos saltar a la posición 0, y el procesador calcula la dirección haciendo PC+4+ 4*Ëxt(inm) por eso ponemos fff9: 4*fff9+001C=0000		
+000100	00000	00000	1111111111111001		beq r0, r2, dir0 dir 24; 
+000111 	00100	00011 	0000000000000100 		SW_pre  R3, 4(R4)
+
+EN hexadecimal:
+
+00001000000000010000000000000000 	08010000	LW  R1, 0(R0)
+00011001000000100000000000000100 	19020004	LW  R2, 4(R8)
+00000000000000000000000000000000	00000000	nop
+00000000000000000000000000000000	00000000	nop
+00000100001000100001100000000000  	04221800	ADD R3, R1, R2
+00000000000000000000000000000000	00000000	nop
+00010000000000011111111111101000	1000FFF9	beq r0, r0, dir0 dir 24; 
+00011100100000110000000000000100 	1C830004	SW_pre  R3, 4(R4)
