@@ -23,4 +23,9 @@ Para programar este módulo, se consideran los siguientes riesgos:
 -Que nuestro RT esté en la etapa de memoria y se vaya a escribir en el -> riesgo_rt_mem
 -Que nuestro RT esté en la etapa de ejecución y se vaya a escribir en el en modo preincremento -> riesgo_rt_pre
 
+Recordatorio: En la preincremento se escribe en M y en las demás en WB.
+
 Si uno de estos riesgos de activa, hay que parar hasta que desaparezca.
+
+Paramos la etapa en fetch poniendo el load del banco IF_ID en función del load_PC, ya que este
+se para si hay riesgos.
