@@ -1,0 +1,60 @@
+formato aritméticas: 
+op	rs	rt	rd	shamt	funct
+000001	00001	00010  	00011  	00000	000000  ADD R3, R1, R2
+
+formato lw, sw, beq:
+op	rs	rt		inm
+000010 	00000	00001 	0000000000000000 		LW  R1, 0(R0)  dir 0
+
+El valor inicial de los registros es 0 (partimos de un reset)
+El código está pensado para funcionar en un procesador con saltos 1-retardados que no detecta los riesgos de datos
+
+En las instrucciones de salto, para saber que inmediato debemos introducir en función del PC y de la dirección de salto
+viene dado por la siguiente expresión: Ext(Inm) = (dirSalto-PC-4)/4
+
+
+Vamos a realizar un programa que haga la suma de dos vectores de dimension 3 y la alamcene el resultado a partir de la dirección 28.
+
+direcciones ->0,4,8,12,16,20,24,28,32,34
+datos		->3,1,6,A(separador de vectores),4,5,8			(DEBEN INTRODUCIRSE EN LA MEMORIA DE DATOS)
+resultado 	->3,1,6,A,4,5,8,7,6,E
+
+Código
+-----------------------
+dir 0 	LW_pre R31, 24(R0) 		//dir del primer resultado en R0
+dir 1 	LW R1, 0(R2) 			//primer dato del V1
+dir 2 	LW_pre R3, 16(R4) 		//primer dato del V2
+dir 3 	ADD R5, R1, R3 			//sumamos datos
+dir 4 	SW_pre R5,4(R0) 		//almacenamos resultado		
+dir 5 	LW_pre R1, 4(R2)  		//cargamos siguiente dato del V1
+dir 6 	LW_pre R3, 4(R4) 		//cargamos siguiente dato del V2
+dir 7 	BEQ R0, R0, dir 3 		//saltamos a la suma
+
+
+
+Separado por campos
+----------------------------------------
+
+
+000110 	00000	11111 	0000000000011000 				LW_pre R31, 24(R0)		dir 0
+000010 	00010	00001 	0000000000000000 				LW R1, 0(R2) 			dir 1
+000110 	00100	00011 	0000000000010000 				LW_pre R3, 16(R4)		dir 2
+000001	00001	00011  	00101  	00000	000000 			ADD R5, R1, R3 			dir 3
+000111 	00000	00101 	0000000000000100 				SW_pre R5,4(R0)			dir 4
+000110 	00010	00001 	0000000000000100 				LW_pre R1, 4(R2)		dir 5
+000110 	00100	00011 	0000000000000100 				LW_pre R3, 4(R4)		dir 6
+000100 	00000	00000 	1111111111111011 				BEQ R0, R0, dir 3 		dir 7
+
+
+En hexadecimal
+----------------------------------------
+
+				Bin 					  Hexa
+00011000000111110000000000011000		181F0018 		LW_pre R31, 24(R0)		dir 0
+00001000010000010000000000000000 		08410000 		LW R1, 0(R2) 			dir 1
+00011000100000110000000000010000 		18830010 		LW_pre R3, 16(R4)		dir 2
+00000100001000110010100000000000 		04232800 		ADD R5, R1, R3 			dir 3
+00011100000001010000000000000100 		1C050004 		SW_pre R5,4(R0)			dir 4
+00011000010000010000000000000100 		18410004 		LW_pre R1, 4(R2)		dir 5
+00011000100000110000000000000100 		18830004 		LW_pre R3, 4(R4)		dir 6
+00010000000000001111111111111011 		1000FFFB 		BEQ R0, R0, dir 3 		dir 7
