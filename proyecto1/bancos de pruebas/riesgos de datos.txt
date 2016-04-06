@@ -13,7 +13,7 @@ En las instrucciones de salto, para saber que inmediato debemos introducir en fu
 viene dado por la siguiente expresión: Ext(Inm) = (dirSalto-PC-4)/4
 
 
-Vamos a realizar un programa que haga la suma de dos vectores de dimension 3 y la alamcene el resultado a partir de la dirección 28.
+Vamos a realizar un programa que haga la suma de dos vectores (matemáticamente hablando) de dimension 3 y la alamcene el resultado a partir de la dirección 28.
 
 direcciones ->0,4,8,12,16,20,24,28,32,34
 datos		->3,1,6,A(separador de vectores),4,5,8			(DEBEN INTRODUCIRSE EN LA MEMORIA DE DATOS)
