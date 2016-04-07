@@ -245,7 +245,7 @@ adder_4: adder32 port map (Din0 => PC_out, Din1 => four, Dout => PC4);
 ------------------------------------------------------------------------------------
 -- En la versión inicial sólo se carga o el PC+4 o la Dirección de salto generada en ID
 -- Para incluir más opciones hay que diseñar un multiplexor 4 a 1
-muxPC: mux2_1 port map (Din0 => PC4, DIn1 => Dirsalto_ID, ctrl => PCSrc, Dout => PC_in);
+ : mux2_1 port map (Din0 => PC4, DIn1 => Dirsalto_ID, ctrl => PCSrc, Dout => PC_in);
 ------------------------------------------------------------------------------------
 -- si leemos una instrucción equivocada tenemos que modificar el código de operación antes de almacenarlo en memoria
 Mem_I: memoriaRAM_I PORT MAP (CLK => CLK, ADDR => PC_out, Din => "00000000000000000000000000000000", WE => '0', RE => '1', Dout => IR_in);
