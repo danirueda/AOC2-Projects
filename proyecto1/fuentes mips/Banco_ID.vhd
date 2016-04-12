@@ -27,10 +27,14 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity Banco_ID is
  Port ( 	IR_in : in  STD_LOGIC_VECTOR (31 downto 0); -- instrucción leida en IF
          PC4_in:  in  STD_LOGIC_VECTOR (31 downto 0); -- PC+4 sumado en IF
+         branch_address_out: in STD_LOGIC_VECTOR (31 downto 0);
+         prediction_out_in: in STD_LOGIC;
 			clk : in  STD_LOGIC;
 			reset : in  STD_LOGIC;
          load : in  STD_LOGIC;
          IR_ID : out  STD_LOGIC_VECTOR (31 downto 0); -- instrucción en la etapa ID
+         branch_address_out_ID: out STD_LOGIC_VECTOR (31 downto 0);
+         prediction_out_ID: out STD_LOGIC;
          PC4_ID:  out  STD_LOGIC_VECTOR (31 downto 0)); -- PC+4 en la etapa ID
 end Banco_ID;
 
@@ -43,10 +47,14 @@ SYNC_PROC: process (clk)
          if (reset = '1') then
             IR_ID <= "00000000000000000000000000000000";
 				PC4_ID <= "00000000000000000000000000000000";
+            prediction_out_ID <= '0';
+            branch_address_out_ID <= "00000000000000000000000000000000";
          else
             if (load='1') then 
 					IR_ID <= IR_in;
 					PC4_ID <= PC4_in;
+               prediction_out_ID <= prediction_out_in;
+               branch_address_out_ID <= branch_address_out;
 				end if;	
          end if;        
       end if;
