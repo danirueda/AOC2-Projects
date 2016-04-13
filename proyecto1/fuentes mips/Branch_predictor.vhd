@@ -44,18 +44,13 @@ signal prediccion, validez : STD_LOGIC; --prediccion, indica que ocurrio la ulti
 			end if;
 		end process;
 		
-		process(PC4)
-			begin
-			if(reset = '1') then
-				branch_address_out <= "00000000000000000000000000000000";
+		process(PC4, validez, prediccion)
+			begin 
+			if (PC4 = etiqueta AND validez = '1' AND prediccion = '1') then
+				prediction_out <= '1';
+				branch_address_out <= dirSalto;
+			else
 				prediction_out <= '0';
-			else 
-				if (PC4 = etiqueta AND validez = '1' AND prediccion = '1') then
-					prediction_out <= '1';
-					branch_address_out <= dirSalto;
-				else
-					prediction_out <= '0';
-				end if;
 			end if;
 		end process;
 end Behavioral;
