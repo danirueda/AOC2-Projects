@@ -261,6 +261,7 @@ adder_4: adder32 port map (Din0 => PC_out, Din1 => four, Dout => PC4);
 ------------------------------------------------------------------------------------
 -- Instanciar aquí el predictor de salto que diseñéis
 update_predictor <= '1' when (prediction_out_ID /= salto) else '0';
+
 predictor: branch_predictor port map (clk => clk, reset => reset ,PC4 => PC4(9 downto 2) , PC4_ID => PC4_ID(9 downto 2),
     branch_address_in => branch_address_in, prediction_in => salto, prediction_out => prediction_out, 
     branch_address_out => branch_address_out, update => update_predictor);
