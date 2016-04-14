@@ -13,7 +13,7 @@ En las instrucciones de salto, para saber que inmediato debemos introducir en fu
 viene dado por la siguiente expresión: Ext(Inm) = (dirSalto-PC-4)/4
 
 
-Vamos a realizar un programa que mueva una tabla de una zona de memoria a otra usando instrucciones pre-incremento.
+Vamos a realizar un programa que copie una tabla de una zona de memoria a otra usando instrucciones pre-incremento.
 Tenemos la siguiente información en memoria de datos.
 
 direcciones ->0,4,8,12,16,20
