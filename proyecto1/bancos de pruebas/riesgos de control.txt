@@ -26,11 +26,12 @@ dir 1 	LW_pre R30, 20(R2)			//Basura en R30 pero nos posicionamos al final de la
 									//(Es como hacer un mov a R2)
 dir 2 	LW_pre R29, 1(R4)			//Basura en R29 pero metemos un 1 en R4
 dir 3 	LW_pre R0, 4(R1)			//Cargamos el primer dato y movemos cursor
-dir 4 	ADD R3,R3,R4				//Incrementamos el contador
-dir 5 	SW_pre R0, 4(R2)			//Movemos el dato a otro lugar de memoria y movemos cursor
-dir 6	BEQ R3, R5, dir12			//Si hemos recorrido toda la tabla, fin del programa
-dir 7 	BEQ R0, R0, dir3			//Saltamos al inicio del bucle
-dir 8 	BEQ R0, R0, dir12			//Bucle infinito de finalización
+dir 4 	NOP R0, 8(R1) 				//Para engañar al procesador a ver si para
+dir 5 	ADD R3,R3,R4				//Incrementamos el contador
+dir 6 	SW_pre R0, 4(R2)			//Movemos el dato a otro lugar de memoria y movemos cursor
+dir 7	BEQ R3, R5, dir9			//Si hemos recorrido toda la tabla, fin del programa
+dir 8 	BEQ R0, R0, dir3			//Saltamos al inicio del bucle
+dir 9 	BEQ R0, R0, dir9			//Bucle infinito de finalización
 
 Separado por campos
 ----------------------------------------
@@ -40,11 +41,12 @@ Separado por campos
 000110 	00010	11110 	0000000000010100 				LW_pre R30, 20(R2)		dir1
 000110 	00100	11101 	0000000000000001 				LW_pre R29, 1(R4) 		dir2
 000110 	00001	00000 	0000000000000100 				LW_pre R0, 4(R1) 		dir3
-000001	00011	00100  	00011  	00000	000000 			ADD R3,R3,R4 			dir4
-000111 	00010	00000 	0000000000000100 				SW_pre R0, 4(R2)		dir5
-000100 	00101	00011 	0000000000000001 				BEQ R3, R5, dir8		dir6
-000100 	00000	00000 	1111111111111011 				BEQ R0, R0, dir3		dir7
-000100 	00000	00000 	1111111111111111 				BEQ R0, R0, dir8		dir8
+000000 	00001 	00000 	0000000000001000 				NOP R0, 8(R1)			dir4 				
+000001	00011	00100  	00011  	00000	000000 			ADD R3,R3,R4 			dir5
+000111 	00010	00000 	0000000000000100 				SW_pre R0, 4(R2)		dir6
+000100 	00101	00011 	0000000000000001 				BEQ R3, R5, dir9		dir7
+000100 	00000	00000 	1111111111111010 				BEQ R0, R0, dir3		dir8
+000100 	00000	00000 	1111111111111111 				BEQ R0, R0, dir9		dir9
 
 
 En hexadecimal
@@ -52,12 +54,13 @@ En hexadecimal
 
 				Bin 					  Hexa
 
-00001000000001010000000000000000		08050000		LW R5, 0(R0)				dir 0
-00011000010111100000000000010100		185E0014		LW_pre R30, 20(R2)			dir 1
-00011000100111010000000000000001		189D0001		LW_pre R29, 1(R4)			dir 2
-00011000001000000000000000000100		18200004		LW_pre R0, 4(R1)			dir 3
-00000100011001000001100000000000		04641800		ADD R3,R3,R4				dir 4
-00011100010000000000000000000100		1C400004 		SW_pre R0, 4(R2)			dir 5
-00010000101000110000000000000001		10A30001 		BEQ R3, R5, dir8			dir 6
-00010000000000001111111111111011		1000FFFB 		BEQ R0, R0, dir3			dir 7
-00010000000000001111111111111111		1000FFFF 		BEQ R0, R0, dir8			dir 8
+00001000000001010000000000000000		08050000		LW R5, 0(R0)				dir0
+00011000010111100000000000010100		185E0014		LW_pre R30, 20(R2)			dir1
+00011000100111010000000000000001		189D0001		LW_pre R29, 1(R4)			dir2
+00011000001000000000000000000100		18200004		LW_pre R0, 4(R1)			dir3
+00000000001000000000000000001000 		00200008 		NOP R0, 8(R1) 				dir4
+00000100011001000001100000000000		04641800		ADD R3,R3,R4				dir5
+00011100010000000000000000000100		1C400004 		SW_pre R0, 4(R2)			dir6
+00010000101000110000000000000001		10A30001 		BEQ R3, R5, dir8			dir7
+00010000000000001111111111111010		1000FFFA 		BEQ R0, R0, dir3			dir8
+00010000000000001111111111111111		1000FFFF 		BEQ R0, R0, dir8			dir9

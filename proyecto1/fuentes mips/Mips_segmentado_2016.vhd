@@ -323,9 +323,9 @@ riesgo_rt_mem <= '1' when (RegWrite_MEM = '1' AND RW_MEM = IR_ID(20 downto 16) a
 riesgo_rt_pre <= '1' when (Update_Rs_EX = '1' AND RS_EX = IR_ID(20 downto 16) and not(IR_ID(31 downto 26)="000010")) else '0';
 
 riesgos <= '1' when (riesgo_rs_ex = '1' OR riesgo_rs_mem = '1' OR riesgo_rs_pre = '1' OR riesgo_rt_ex = '1' OR
-riesgo_rt_mem = '1' OR riesgo_rt_pre = '1') else '0';
+riesgo_rt_mem = '1' OR riesgo_rt_pre = '1') AND IR_ID(31 downto 26) /= "000000"  else '0';
 
-op_code_ID <= "000000" when (riesgos = '1' and IR_ID(31 downto 26) /= "000000") else IR_ID(31 downto 26);
+op_code_ID <= "000000" when riesgos = '1' else IR_ID(31 downto 26);
 
 
 

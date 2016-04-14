@@ -40,8 +40,8 @@ end memoriaRAM_I;
 
 architecture Behavioral of memoriaRAM_I is
 type RamType is array(0 to 127) of std_logic_vector(31 downto 0); --Esta metido el codigo retardado (codigo con nops)
-signal RAM : RamType := (  X"08050000", X"185E0014", X"189D0001", X"18200004", X"04641800", X"1C400004", X"10A30001", X"1000FFFB", -- posiciones 0,1,2,3,4,5,6,7
-									X"1000FFFF", X"BEBACAFE", X"1000FFF8", X"00000000", X"1000FFFF", X"00000000", X"30008001", X"00000007", --posicones 8,9,...
+signal RAM : RamType := (  X"08050000", X"185E0014", X"189D0001", X"18200004", X"00200008", X"04641800", X"1C400004", X"10A30001", -- posiciones 0,1,2,3,4,5,6,7
+									X"1000FFFA", X"1000FFFF", X"1000FFF8", X"00000000", X"1000FFFF", X"00000000", X"30008001", X"00000007", --posicones 8,9,...
 									X"20000000", X"20000000", X"30018001", X"02AD6093", X"30008001", X"00000001", X"20000000", X"30002001",
 									X"00010900", X"20000000", X"30004000", X"5000102D", X"01000300", X"80000400", X"10000000", X"00000000",
 									X"00002000", X"00000000", X"00000000", X"00000002", X"00000000", X"00000000", X"00000000", X"00000002",
