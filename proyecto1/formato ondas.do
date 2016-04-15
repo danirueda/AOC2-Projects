@@ -3,24 +3,24 @@ quietly WaveActivateNextPane {} 0
 add wave -noupdate -label clk /testbench/uut/clk
 add wave -noupdate -label reset /testbench/uut/pc/reset
 add wave -noupdate -label load /testbench/uut/pc/load
-add wave -noupdate -group MuxPC -color {Medium Aquamarine} -label muxPC/DIn0 /testbench/uut/muxPC/DIn0
-add wave -noupdate -group MuxPC -color {Medium Aquamarine} -label muxPC/DIn1 /testbench/uut/muxPC/DIn1
-add wave -noupdate -group MuxPC -color {Medium Aquamarine} -label muxPC/DIn2 /testbench/uut/muxPC/DIn2
-add wave -noupdate -group MuxPC -color {Medium Aquamarine} -label muxPC/DIn3 /testbench/uut/muxPC/DIn3
-add wave -noupdate -group MuxPC -color {Medium Aquamarine} -label muxPC/Dout /testbench/uut/muxPC/Dout
-add wave -noupdate -group MuxPC -color {Medium Aquamarine} -label muxPC/ctrl /testbench/uut/muxPC/ctrl
-add wave -noupdate -group Predictor -label predictor/validez /testbench/uut/predictor/validez
-add wave -noupdate -group Predictor -label predictor/prediccion /testbench/uut/predictor/prediccion
-add wave -noupdate -group Predictor -label predictor/branch_address_in /testbench/uut/predictor/branch_address_in
-add wave -noupdate -group Predictor -label predictor/branch_address_out /testbench/uut/predictor/branch_address_out
-add wave -noupdate -group Predictor -label predictor/PC4 /testbench/uut/predictor/PC4
-add wave -noupdate -group Predictor -label predictor/dirSalto /testbench/uut/predictor/dirSalto
-add wave -noupdate -group Predictor -label predictor/etiqueta /testbench/uut/predictor/etiqueta
-add wave -noupdate -group Predictor -label predictor/PC4_ID /testbench/uut/predictor/PC4_ID
-add wave -noupdate -group Predictor -label predictor/prediction_in /testbench/uut/predictor/prediction_in
-add wave -noupdate -group Predictor -label predictor/prediction_out /testbench/uut/predictor/prediction_out
-add wave -noupdate -group Predictor -label predictor/validez /testbench/uut/predictor/validez
-add wave -noupdate -group Predictor -label predictor/update /testbench/uut/predictor/update
+add wave -noupdate -expand -group MuxPC -color {Medium Aquamarine} -label muxPC/DIn0 /testbench/uut/muxPC/DIn0
+add wave -noupdate -expand -group MuxPC -color {Medium Aquamarine} -label muxPC/DIn1 /testbench/uut/muxPC/DIn1
+add wave -noupdate -expand -group MuxPC -color {Medium Aquamarine} -label muxPC/DIn2 /testbench/uut/muxPC/DIn2
+add wave -noupdate -expand -group MuxPC -color {Medium Aquamarine} -label muxPC/DIn3 /testbench/uut/muxPC/DIn3
+add wave -noupdate -expand -group MuxPC -color {Medium Aquamarine} -label muxPC/Dout /testbench/uut/muxPC/Dout
+add wave -noupdate -expand -group MuxPC -color {Medium Aquamarine} -label muxPC/ctrl /testbench/uut/muxPC/ctrl
+add wave -noupdate -expand -group Predictor -label predictor/validez /testbench/uut/predictor/validez
+add wave -noupdate -expand -group Predictor -label predictor/prediccion /testbench/uut/predictor/prediccion
+add wave -noupdate -expand -group Predictor -label predictor/branch_address_in /testbench/uut/predictor/branch_address_in
+add wave -noupdate -expand -group Predictor -label predictor/branch_address_out /testbench/uut/predictor/branch_address_out
+add wave -noupdate -expand -group Predictor -label predictor/PC4 /testbench/uut/predictor/PC4
+add wave -noupdate -expand -group Predictor -label predictor/dirSalto /testbench/uut/predictor/dirSalto
+add wave -noupdate -expand -group Predictor -label predictor/etiqueta /testbench/uut/predictor/etiqueta
+add wave -noupdate -expand -group Predictor -label predictor/PC4_ID /testbench/uut/predictor/PC4_ID
+add wave -noupdate -expand -group Predictor -label predictor/prediction_in /testbench/uut/predictor/prediction_in
+add wave -noupdate -expand -group Predictor -label predictor/prediction_out /testbench/uut/predictor/prediction_out
+add wave -noupdate -expand -group Predictor -label predictor/validez /testbench/uut/predictor/validez
+add wave -noupdate -expand -group Predictor -label predictor/update /testbench/uut/predictor/update
 add wave -noupdate -group pc -label pc/Din /testbench/uut/pc/Din
 add wave -noupdate -group pc -label pc/Dout /testbench/uut/pc/Dout
 add wave -noupdate -group Mem_I -label Mem_I/ADDR /testbench/uut/Mem_I/ADDR
@@ -78,7 +78,7 @@ add wave -noupdate -group Banco_MEM_WB -color {Medium Blue} -label Banco_MEM_WB/
 add wave -noupdate -label mux_busW/ctrl /testbench/uut/mux_busW/ctrl
 add wave -noupdate -label mux_busW/Dout /testbench/uut/mux_busW/Dout
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {169 ns} 0}
+WaveRestoreCursors {{Cursor 1} {402 ns} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 209
 configure wave -valuecolwidth 100
@@ -94,4 +94,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {58 ns} {112 ns}
+WaveRestoreZoom {371 ns} {417 ns}
