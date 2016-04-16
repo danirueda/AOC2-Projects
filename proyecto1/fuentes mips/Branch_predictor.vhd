@@ -1,3 +1,8 @@
+----------------------------------------------------------------------------------------------------------------------------
+--Autor: Daniel Rueda Macías
+--Company: Unizar
+--Description: Predictor de saltos del MIPS segmentado que hace una prediccion dinamica en funcion de la prediccion anterior
+----------------------------------------------------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
@@ -44,12 +49,12 @@ signal prediccion, validez : STD_LOGIC; --prediccion, indica que ocurrio la ulti
 			end if;
 		end process;
 		
-		process(PC4, validez, prediccion)
+		process(PC4, validez, prediccion) --comparador
 			begin 
-			if (PC4 = etiqueta AND validez = '1' AND prediccion = '1') then
+			if (PC4 = etiqueta AND validez = '1' AND prediccion = '1') then --si se cumple la condicion se salta
 				prediction_out <= '1';
 				branch_address_out <= dirSalto;
-			else
+			else --en caso contrario no se salta
 				prediction_out <= '0';
 			end if;
 		end process;

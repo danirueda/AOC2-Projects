@@ -31,7 +31,7 @@ component reg32 is
            Dout : out  STD_LOGIC_VECTOR (31 downto 0));
 end component;
 ---------------------------------------------------------------
--- Interfaz del componente que debéis diseñar
+-- Predictor de saltos
 component branch_predictor is
  Port ( 	clk : in  STD_LOGIC;
 			reset : in  STD_LOGIC;
@@ -59,7 +59,7 @@ component mux2_1 is
            Dout : out  STD_LOGIC_VECTOR (31 downto 0));
 end component;
 
-component mux4_32bits is
+component mux4_32bits is --mux del pc
 Port (   --Entradas
      DIn0 : in  STD_LOGIC_VECTOR (31 downto 0);
          DIn1 : in  STD_LOGIC_VECTOR (31 downto 0);
@@ -249,7 +249,7 @@ signal op_code_ID : std_logic_vector(31 downto 26);
 signal prediction_out, prediction_in, update_predictor, prediction_out_ID: std_logic;
 signal branch_address_in, branch_address_out, branch_address_out_ID, instruction_in: std_logic_vector(31 downto 0); --seniales para el predictor
 signal controlMuxPC: STD_LOGIC_VECTOR (1 downto 0);
-signal error_saltos, error_salto_noSalto, error_noSalto_salto, hayError: std_logic;
+signal error_saltos, error_salto_noSalto, error_noSalto_salto, hayError: std_logic; --errores en el predictor
 begin
 pc: reg32 port map (Din => PC_in, clk => clk, reset => reset, load => load_PC, Dout => PC_out);
 ------------------------------------------------------------------------------------
@@ -259,15 +259,14 @@ four <= "00000000000000000000000000000100";
 
 adder_4: adder32 port map (Din0 => PC_out, Din1 => four, Dout => PC4);
 ------------------------------------------------------------------------------------
--- Instanciar aquí el predictor de salto que diseñéis
+-- Predictor de saltos
 update_predictor <= '1' when (prediction_out_ID /= salto) else '0';
 
 predictor: branch_predictor port map (clk => clk, reset => reset ,PC4 => PC4(9 downto 2) , PC4_ID => PC4_ID(9 downto 2),
     branch_address_in => branch_address_in, prediction_in => salto, prediction_out => prediction_out, 
     branch_address_out => branch_address_out, update => update_predictor);
 ------------------------------------------------------------------------------------
--- En la versión inicial sólo se carga o el PC+4 o la Dirección de salto generada en ID
--- Para incluir más opciones hay que diseñar un multiplexor 4 a 1
+
 muxPC: mux4_32bits port map (DIn0 => PC4, DIn1 => branch_address_out, DIn2 => PC4_ID, DIn3 => Dirsalto_ID, ctrl => controlMuxPC, Dout => PC_in);
 
 --Casos de error
@@ -276,8 +275,7 @@ error_salto_noSalto <= '1' when (prediction_out_ID = '1' and salto = '0') else '
 error_saltos <= '1' when (prediction_out_ID = '1' and salto = '1' and Dirsalto_ID /= branch_address_out_ID) else '0'; --que en F me digan que salto, que en D me digan que salto y que las direcciones de salto no coincidan
 
 hayError <= '1' when (error_noSalto_salto = '1' or error_salto_noSalto = '1' or error_noSalto_salto = '1') else '0';
---FALTAN CASOS DE SI HAY ERRORES, METER EL DATO BUENO EN EL PREDCITOR
---ESTA SI O SI OSTIAAAAA
+
 controlMuxPC <= "00" when (prediction_out = '0' and hayError = '0') else 
 "01" when (prediction_out = '1' and hayError = '0') else 
 "10" when (error_salto_noSalto = '1') else
@@ -286,18 +284,17 @@ controlMuxPC <= "00" when (prediction_out = '0' and hayError = '0') else
 branch_address_in <= Dirsalto_ID when (error_noSalto_salto = '1' or error_saltos = '1') else PC4_ID;
 
 
-------------------------------------------------------------------------------------
--- si leemos una instrucción equivocada tenemos que modificar el código de operación antes de almacenarlo en memoria
+
 Mem_I: memoriaRAM_I PORT MAP (CLK => CLK, ADDR => PC_out, Din => "00000000000000000000000000000000", WE => '0', RE => '1', Dout => IR_in);
-------------------------------------------------------------------------------------
--- hay que añadir los campos necesarios a los registros intermedios
+
+
 instruction_in <= "00000000000000000000000000000000" when (update_predictor = '1') else IR_in; --si hay fallo del predictor metemos nops
 --El banco sigue sacando datos si load_PC no ha parado
 Banco_IF_ID: Banco_ID port map (IR_in => instruction_in, PC4_in => PC4, clk => clk, reset => reset, load => load_PC, IR_ID => IR_ID, PC4_ID => PC4_ID,
     prediction_out_in => prediction_out,  prediction_out_ID => prediction_out_ID, branch_address_out_ID => branch_address_out_ID, branch_address_out => branch_address_out);
---
+
 ------------------------------------------Etapa ID-------------------------------------------------------------------
--- Hay que añadir un nuevo puerto de escritura al banco de registros
+
 Register_bank: BReg PORT MAP (clk => clk, reset => reset, RA => IR_ID(25 downto 21), RB => IR_ID(20 downto 16), RW => RW_WB, BusW => BusW, 
 									RegWrite => RegWrite_WB, BusA => BusA, BusB => BusB, RS => RS_MEM, BusRS => ALU_out_MEM, Update_Rs => Update_Rs_MEM);
 -------------------------------------------------------------------------------------
@@ -323,18 +320,17 @@ riesgo_rt_mem <= '1' when (RegWrite_MEM = '1' AND RW_MEM = IR_ID(20 downto 16) a
 riesgo_rt_pre <= '1' when (Update_Rs_EX = '1' AND RS_EX = IR_ID(20 downto 16) and not(IR_ID(31 downto 26)="000010") and not(IR_ID(31 downto 26)="000110")) else '0';
 
 riesgos <= '1' when (riesgo_rs_ex = '1' OR riesgo_rs_mem = '1' OR riesgo_rs_pre = '1' OR riesgo_rt_ex = '1' OR
-riesgo_rt_mem = '1' OR riesgo_rt_pre = '1') AND IR_ID(31 downto 26) /= "000000"  else '0';
+riesgo_rt_mem = '1' OR riesgo_rt_pre = '1') AND IR_ID(31 downto 26) /= "000000"  else '0'; --se activan riesgos si hay algun riesgo y la instruccion no es un NOP
 
 op_code_ID <= "000000" when riesgos = '1' else IR_ID(31 downto 26);
 
 
 
--------------------------------------------------------------------------------------
--- Deberéis incluir la nueva señal Update_Rs en la unidad de control
+
 UC_seg: UC port map (IR_op_code => op_code_ID, Branch => Branch, RegDst => RegDst_ID,  ALUSrc => ALUSrc_ID, MemWrite => MemWrite_ID,  
 							MemRead => MemRead_ID, MemtoReg => MemtoReg_ID, RegWrite => RegWrite_ID, Update_Rs => Update_Rs_ID);
--------------------------------------------------------------------------------------
--- Ahora mismo sólo esta implementada la instrucción de salto BEQ. Si es una instrucción de salto y se activa la señal Z se carga la dirección de salto, sino PC+4 	
+
+
 salto <= Branch AND Z; 				
 -- si la operación es aritmética (es decir: IR_ID(31 downto 26)= "000001") miro el campo funct
 -- como sólo hay 4 operaciones en la alu, basta con los bits menos significativos del campo func de la instrucción	
@@ -358,7 +354,7 @@ muxALU_src: mux2_1 port map (Din0 => busB_EX, DIn1 => inm_ext_EX, ctrl => ALUSrc
 ALU_MIPs: ALU PORT MAP ( DA => BusA_EX, DB => Mux_out, ALUctrl => ALUctrl_EX, Dout => ALU_out_EX);
 
 mux_dst: mux2_5bits port map (Din0 => Reg_Rt_EX, DIn1 => Reg_Rd_EX, ctrl => RegDst_EX, Dout => RW_EX);
--- hay que añadir los campos necesarios a los registros intermedios
+
 Banco_EX_MEM: Banco_MEM PORT MAP ( ALU_out_EX => ALU_out_EX, ALU_out_MEM => ALU_out_MEM, clk => clk, reset => reset, load => '1', MemWrite_EX => MemWrite_EX,
 												MemRead_EX => MemRead_EX, MemtoReg_EX => MemtoReg_EX, RegWrite_EX => RegWrite_EX, MemWrite_MEM => MemWrite_MEM, MemRead_MEM => MemRead_MEM,
 												MemtoReg_MEM => MemtoReg_MEM, RegWrite_MEM => RegWrite_MEM, BusB_EX => BusB_EX, BusB_MEM => BusB_MEM, RW_EX => RW_EX, RW_MEM => RW_MEM,
@@ -368,11 +364,14 @@ Banco_EX_MEM: Banco_MEM PORT MAP ( ALU_out_EX => ALU_out_EX, ALU_out_MEM => ALU_
 --
 
 Mem_D: memoriaRAM_D PORT MAP (CLK => CLK, ADDR => ALU_out_MEM, Din => BusB_MEM, WE => MemWrite_MEM, RE => MemRead_MEM, Dout => Mem_out);
--- hay que añadir los campos necesarios a los registros intermedios
+
 Banco_MEM_WB: Banco_WB PORT MAP ( ALU_out_MEM => ALU_out_MEM, ALU_out_WB => ALU_out_WB, Mem_out => Mem_out, MDR => MDR, clk => clk, reset => reset, load => '1', MemtoReg_MEM => MemtoReg_MEM, RegWrite_MEM => RegWrite_MEM, 
 											MemtoReg_WB => MemtoReg_WB, RegWrite_WB => RegWrite_WB, RW_MEM => RW_MEM, RW_WB => RW_WB);
 mux_busW: mux2_1 port map (Din0 => ALU_out_WB, DIn1 => MDR, ctrl => MemtoReg_WB, Dout => busW);
 
+--
+--------------------------------------Etapa WB--------------------------------------------------------------------
+--
 output <= IR_ID;
 end Behavioral;
 

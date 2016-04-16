@@ -38,7 +38,7 @@ entity UC is
            MemRead : out  STD_LOGIC;
            MemtoReg : out  STD_LOGIC;
            RegWrite : out  STD_LOGIC;
-    	   Update_Rs : out STD_LOGIC);
+    	   Update_Rs : out STD_LOGIC); --Senial de control para actualizar el nuevo puerto en las preincremento
 end UC;
 
 architecture Behavioral of UC is
@@ -46,7 +46,6 @@ architecture Behavioral of UC is
 begin
 -- Si IR_op = 0 es nop, IR_op=1 es aritmética, IR_op=2 es LW, IR_op=3 es SW, IR_op= 4 es BEQ
 -- este CASE es en realidad un mux con las entradas fijas.
--- IMPORTANTE: los valores iniciales no son correctos! Tenéis que ponerlos bien
 UC_mux : process (IR_op_code)
 begin 
 	CASE IR_op_code IS
