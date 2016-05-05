@@ -54,7 +54,7 @@ entity UC_DMA is
 end UC_DMA;
 
 architecture Behavioral of UC_DMA is
-   --Si ponéis en el siguiente tipo el nombre de vuestros estados, los podéis usar después. Os pongo un ejemplo con algunos nombres. Cambiadlos, y anñadid los que necesitéis.
+   --Si ponéis en el siguiente tipo el nombre de vuestros estados, los podéis usar después. Os pongo un ejemplo con algunos nombres. Cambiadlos, y añadid los que necesitéis.
    type state_type is (INI, Escribir_IO, Leer_IO) ; 
    signal state, next_state : state_type; 
    

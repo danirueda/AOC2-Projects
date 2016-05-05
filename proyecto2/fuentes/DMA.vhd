@@ -50,6 +50,7 @@ end DMA_cont;
 
 architecture Behavioral of DMA_cont is
 
+--Unidad de control del DMA
 component UC_DMA is
     Port ( clk : in  STD_LOGIC;
           reset : in  STD_LOGIC;
@@ -74,6 +75,8 @@ component UC_DMA is
 		  );
 end component;
 
+--Se utiliza como almacenamient intermedio en las comunicaciones entre MD o IO.
+--En él se guarda el dato leído hasta que se pueda escribir su destino.
 component reg8 is
     Port ( Din : in  STD_LOGIC_VECTOR (7 downto 0);
            clk : in  STD_LOGIC;
@@ -82,6 +85,16 @@ component reg8 is
            Dout : out  STD_LOGIC_VECTOR (7 downto 0));
 end component;
 
+--Registro de control del DMA
+--Bits 31 a 24: Control
+--Bits 23 a 16: Número de palabras de 32 bits a transferir
+--Bits 15 a 8: Dirección del periférico
+--Bits 7 a 0: Dirección de memoria de datos
+------------------------------------------------------------------------------------
+--Bits de control
+--Done (31): Indica que se ha terminado la transferencia anterior. LO ACTUALIZA EL DMA al terminar una transferencia
+--L/E (25): Indica si la operación es lectura o escritura. Si vale 0 se lee en MD y se escrive en la IO, y si vale 1 viceversa.
+--Start (24): Indica que hay que realizar una transferencia. Sólo se hace caso si Done=0.
 component reg32 is
     Port ( Din : in  STD_LOGIC_VECTOR (31 downto 0);
            clk : in  STD_LOGIC;
@@ -90,6 +103,7 @@ component reg32 is
            Dout : out  STD_LOGIC_VECTOR (31 downto 0));
 end component;
 
+--Contador
 component counter is
     Port ( clk : in  STD_LOGIC;
            reset : in  STD_LOGIC;

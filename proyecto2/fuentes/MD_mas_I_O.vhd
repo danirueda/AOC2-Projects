@@ -108,12 +108,12 @@ begin
 --   BUS
 ------------------------------------------------------------------------------------------------
 -- Bus datos 
-	Bus_data <= Din when Mips_send_data='1' else "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"; -- Din son los datos que enviá el Mips. 
+	Bus_data <= Din when Mips_send_data='1' else "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"; -- Din son los datos que envia el Mips. 
 	Bus_data <= MD_Dout when MD_send_data ='1' else "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	Bus_data <= DMA_bus_out when (DMA_send_data ='1') else "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	Bus_data <= X"00000000" when (Mips_send_data='0' and MD_send_data='0' and DMA_send_data='0') else "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";--para que esté a cero cuando nadie vuelca nada
 -- Bus addr 
-	Bus_addr <= addr when Mips_send_addr='1' else "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"; -- addr es la dir que enviá el Mips. 
+	Bus_addr <= addr when Mips_send_addr='1' else "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"; -- addr es la dir que envia el Mips. 
 	Bus_addr <= DMA_addr when (DMA_send_addr ='1') else "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";	
 	Bus_addr <= X"00000000" when (Mips_send_addr='0' and DMA_send_addr='0') else "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";--para que esté a cero cuando nadie vuelca nada
 -- control
