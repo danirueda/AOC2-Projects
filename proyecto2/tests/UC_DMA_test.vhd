@@ -74,7 +74,7 @@ end component;
 	  wait for CLK_period*2;	  
 	  IO_sync <= '0'; --el esclavo cierra el protocolo
 	  wait for CLK_period*2;
-	  IO_sync <= '1';-- el esclavo ha escrito el dato
+	  IO_sync <= '1'; -- el esclavo ha escrito el dato
 	  wait for CLK_period;
 	  fin <= '1';	  -- hemos terminado la transferencia
 	  wait for CLK_period;

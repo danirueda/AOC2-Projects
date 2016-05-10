@@ -70,13 +70,15 @@ Port (   --Entradas
          Dout : out  STD_LOGIC_VECTOR (31 downto 0));
 end component;
 
-component memoriaRAM_D is port (
+component MD_mas_I_O is port (
 		  CLK : in std_logic;
-		  ADDR : in std_logic_vector (31 downto 0); --Dir 
-          Din : in std_logic_vector (31 downto 0);--entrada de datos para el puerto de escritura
-          WE : in std_logic;		-- write enable	
-		  RE : in std_logic;		-- read enable		  
-		  Dout : out std_logic_vector (31 downto 0));
+          reset: in std_logic; -- sólo resetea el controlador de DMA
+          ADDR : in std_logic_vector (31 downto 0); --Dir 
+          Din : in std_logic_vector (31 downto 0);--entrada de datos desde el Mips
+          WE : in std_logic;        -- write enable del MIPS
+          RE : in std_logic;        -- read enable del MIPS 
+          MEM_STALL: out std_logic; --señal de parada por riesgo estructural en la etapa MEM      
+          Dout : out std_logic_vector (31 downto 0)); --salida que puede leer el MIPS
 end component;
 
 component memoriaRAM_I is port (
@@ -238,7 +240,7 @@ COMPONENT Banco_MEM
     END COMPONENT; 
 
 signal load_PC, salto, RegWrite_ID, RegWrite_EX, RegWrite_MEM, RegWrite_WB, Z, Branch, RegDst_ID, RegDst_EX, ALUSrc_ID, ALUSrc_EX: std_logic;
-signal MemtoReg_ID, MemtoReg_EX, MemtoReg_MEM, MemtoReg_WB, MemWrite_ID, MemWrite_EX, MemWrite_MEM, MemRead_ID, MemRead_EX, MemRead_MEM: std_logic;
+signal MemtoReg_ID, MemtoReg_EX, MemtoReg_MEM, MemtoReg_WB, MemWrite_ID, MemWrite_EX, MemWrite_MEM, MemRead_ID, MemRead_EX, MemRead_MEM, MEM_STALL: std_logic;
 signal Update_Rs_ID, Update_Rs_EX, Update_Rs_MEM: std_logic;
 signal PC_in, PC_out, four, PC4, Dirsalto_ID, IR_in, IR_ID, PC4_ID, inm_ext_EX, Mux_out : std_logic_vector(31 downto 0);
 signal BusW, BusA, BusB, BusA_EX, BusB_EX, BusB_MEM, inm_ext, inm_ext_x4, ALU_out_EX, ALU_out_MEM, ALU_out_WB, Mem_out, MDR : std_logic_vector(31 downto 0);
@@ -363,7 +365,8 @@ Banco_EX_MEM: Banco_MEM PORT MAP ( ALU_out_EX => ALU_out_EX, ALU_out_MEM => ALU_
 ------------------------------------------Etapa MEM-------------------------------------------------------------------
 --
 
-Mem_D: memoriaRAM_D PORT MAP (CLK => CLK, ADDR => ALU_out_MEM, Din => BusB_MEM, WE => MemWrite_MEM, RE => MemRead_MEM, Dout => Mem_out);
+MD_IO: MD_mas_I_O PORT MAP (CLK => CLK, ADDR => ALU_out_MEM, Din => BusB_MEM, WE => MemWrite_MEM, RE => MemRead_MEM, MEM_STALL => MEM_STALL,
+ Dout => Mem_out, reset => reset);
 
 Banco_MEM_WB: Banco_WB PORT MAP ( ALU_out_MEM => ALU_out_MEM, ALU_out_WB => ALU_out_WB, Mem_out => Mem_out, MDR => MDR, clk => clk, reset => reset, load => '1', MemtoReg_MEM => MemtoReg_MEM, RegWrite_MEM => RegWrite_MEM, 
 											MemtoReg_WB => MemtoReg_WB, RegWrite_WB => RegWrite_WB, RW_MEM => RW_MEM, RW_WB => RW_WB);
