@@ -90,7 +90,7 @@ begin
 			  DMA_sync <= '1';
 			  DMA_send_data <= '0';
 			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
+			  DMA_Burst <= '1';
 			  DMA_wait <= '0';
 	          next_state <= sincro_escribirIO;
           elsif (empezar = '1' and Bus_Req = '0' and L_E = '1') then
@@ -106,7 +106,7 @@ begin
 			  DMA_sync <= '1';
 			  DMA_send_data <= '0';
 			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
+			  DMA_Burst <= '1';
 			  DMA_wait <= '0';
 	          next_state <= sincro_leerIO;
           else
@@ -214,26 +214,22 @@ begin
 			  DMA_wait <= '1';
 	          next_state <= leerIO;
 	   		elsif (IO_sync = '0' and fin = '0') then
-	   		--Si aun no hemos terminao y el IO ha bajado su señal de sincronización, escribimos la palabra en
-	   		--memoria, incrementamos contador, activamos ráfaga y bajamos la señal de sincronización.
 	   		  update_done <= '0';
 			  reset_count <= '0';
 			  count_enable <= '1';
 			  load_data <= '0';
 			  DMA_MD_RE <= '0';
 			  DMA_MD_WE <= '1';
-			  DMA_IO_RE <= '0';
+			  DMA_IO_RE <= '1';
 			  DMA_IO_WE <= '0';
 			  DMA_sync <= '1';
 			  DMA_send_data <= '1';
 			  DMA_send_addr <= '1';
-			  DMA_Burst <= '1';
+			  --DMA_Burst <= '1';
 			  DMA_wait <= '0';
 	          next_state <= sincro_leerIO;
 	   		elsif (IO_sync = '0' and fin = '1') then
-	   		--Si nos dicen que hemos termnado y el IO ha bajado su señal de sincronización, escribimos la palabra
-	   		--en memoria, incrementamos contador y bajamos la señal de sincronización.
-	   		  update_done <= '0';
+	   		  update_done <= '1';
 			  reset_count <= '0';
 			  count_enable <= '1';
 			  load_data <= '0';
@@ -278,12 +274,12 @@ begin
 			  DMA_sync <= '1';
 			  DMA_send_data <= '0';
 			  DMA_send_addr <= '0';
-			  DMA_Burst <= '1';
+			  --DMA_Burst <= '1';
 			  DMA_wait <= '0';
 	          next_state <= sincro_escribirIO;
 	   		elsif (IO_sync = '0' and fin = '1') then
 	   		--Si nos dicen que terminamos y el IO baja su señal de sincronización el DMA baja su señal de sincronización.
-	   		  update_done <= '0';
+	   		  update_done <= '1';
 			  reset_count <= '0';
 			  count_enable <= '0';
 			  load_data <= '0';
