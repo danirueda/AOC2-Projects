@@ -62,11 +62,11 @@ end component;
       reset <= '1';
       wait for CLK_period;
       reset <= '0';
-      Bus_data <= x"01020800";--movemos dos palabras de IO a MD
+      Bus_data <= x"01020800"; --movemos dos palabras de IO a MD
       Bus_WE <= '1';
       Bus_RE <= 'Z';
       Bus_addr<= x"00000200";
-	  Bus_Req <= '1';--el mips está usando el bus
+	  Bus_Req <= '1'; --el mips está usando el bus
 	  IO_sync <= '0';
 	  DMA_IO_in <= x"00000000";
       wait for CLK_period;
@@ -79,7 +79,7 @@ end component;
 	  wait for CLK_period*2;	  
 	  IO_sync <= '0';
 	  wait for CLK_period*2;
-	  Bus_Req <= '1';--el mips quiere usar el bus (le ignoramos)
+	  Bus_Req <= '1'; --el mips quiere usar el bus (le ignoramos)
 	  wait for CLK_period*2;	  
 	  IO_sync <= '1';
 	  wait for CLK_period*2;
