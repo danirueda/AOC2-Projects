@@ -175,7 +175,9 @@ COMPONENT Banco_EX
          Reg_Rt_ID : IN  std_logic_vector(4 downto 0);
          Reg_Rd_ID : IN  std_logic_vector(4 downto 0);
          Reg_Rt_EX : OUT  std_logic_vector(4 downto 0);
-         Reg_Rd_EX : OUT  std_logic_vector(4 downto 0)
+         Reg_Rd_EX : OUT  std_logic_vector(4 downto 0);
+         op_code_ID : in STD_LOGIC_VECTOR (5 downto 0);
+         op_code_EX : out STD_LOGIC_VECTOR (5 downto 0)
         );
     END COMPONENT;
 
@@ -217,7 +219,9 @@ COMPONENT Banco_MEM
          Update_Rs_EX : in STD_LOGIC;
          Update_Rs_MEM : out STD_LOGIC;
          RW_EX : IN  std_logic_vector(4 downto 0);
-         RW_MEM : OUT  std_logic_vector(4 downto 0)
+         RW_MEM : OUT  std_logic_vector(4 downto 0);
+         op_code_EX : in STD_LOGIC_VECTOR (5 downto 0);
+         op_code_MEM : out STD_LOGIC_VECTOR (5 downto 0)
         );
     END COMPONENT;
  
@@ -246,16 +250,21 @@ signal PC_in, PC_out, four, PC4, Dirsalto_ID, IR_in, IR_ID, PC4_ID, inm_ext_EX, 
 signal BusW, BusA, BusB, BusA_EX, BusB_EX, BusB_MEM, inm_ext, inm_ext_x4, ALU_out_EX, ALU_out_MEM, ALU_out_WB, Mem_out, MDR : std_logic_vector(31 downto 0);
 signal RW_EX, RW_MEM, RW_WB, Reg_Rd_EX, Reg_Rt_EX, RS_EX, RS_MEM: std_logic_vector(4 downto 0);
 signal ALUctrl_ID, ALUctrl_EX : std_logic_vector(2 downto 0);
-signal riesgo_rs_ex, riesgo_rs_mem, riesgo_rs_pre, riesgo_rt_ex, riesgo_rt_mem, riesgo_rt_pre, riesgos: std_logic; --Seniales para controlar los riesgos
-signal op_code_ID : std_logic_vector(31 downto 26);
+signal riesgo_rs_ex, riesgo_rs_mem, riesgo_rs_pre, riesgo_rt_ex, riesgo_rt_mem, riesgo_rt_pre, riesgo_datos: std_logic; --Seniales para controlar los riesgos de datos
+signal riesgo_bus, riesgo_lw, riesgo_sw, riesgo_lw_pre, riesgo_sw_pre : std_logic;
+signal op_code_ID, op_code_EX, op_code_MEM : std_logic_vector(31 downto 26);
 signal prediction_out, prediction_in, update_predictor, prediction_out_ID: std_logic;
 signal branch_address_in, branch_address_out, branch_address_out_ID, instruction_in: std_logic_vector(31 downto 0); --seniales para el predictor
 signal controlMuxPC: STD_LOGIC_VECTOR (1 downto 0);
 signal error_saltos, error_salto_noSalto, error_noSalto_salto, hayError: std_logic; --errores en el predictor
+signal load_ID_EX, load_EX_MEM : std_logic;
 begin
 pc: reg32 port map (Din => PC_in, clk => clk, reset => reset, load => load_PC, Dout => PC_out);
 ------------------------------------------------------------------------------------
-load_PC <= '1' when riesgos = '0' else '0'; --PC avanza si no hay riesgos, si los hay para.
+--Control de las señales de load
+load_PC <= '1' when (riesgo_datos = '0' and riesgo_bus = '0') else '0'; --PC avanza si no hay riesgos ni de datos ni de bus, si los hay para.
+load_ID_EX <= '1' when (riesgo_bus = '0') else '0';
+load_EX_MEM <= '1' when (riesgo_bus = '0') else '0';
 ------------------------------------------------------------------------------------
 four <= "00000000000000000000000000000100";
 
@@ -321,10 +330,12 @@ riesgo_rt_ex <= '1' when (RegWrite_EX = '1' AND RW_EX = IR_ID(20 downto 16) and 
 riesgo_rt_mem <= '1' when (RegWrite_MEM = '1' AND RW_MEM = IR_ID(20 downto 16) and not(IR_ID(31 downto 26)="000010") and not(IR_ID(31 downto 26)="000110")) else '0';
 riesgo_rt_pre <= '1' when (Update_Rs_EX = '1' AND RS_EX = IR_ID(20 downto 16) and not(IR_ID(31 downto 26)="000010") and not(IR_ID(31 downto 26)="000110")) else '0';
 
-riesgos <= '1' when (riesgo_rs_ex = '1' OR riesgo_rs_mem = '1' OR riesgo_rs_pre = '1' OR riesgo_rt_ex = '1' OR
+riesgo_datos <= '1' when (riesgo_rs_ex = '1' OR riesgo_rs_mem = '1' OR riesgo_rs_pre = '1' OR riesgo_rt_ex = '1' OR
 riesgo_rt_mem = '1' OR riesgo_rt_pre = '1') AND IR_ID(31 downto 26) /= "000000"  else '0'; --se activan riesgos si hay algun riesgo y la instruccion no es un NOP
 
-op_code_ID <= "000000" when riesgos = '1' else IR_ID(31 downto 26);
+
+
+op_code_ID <= "000000" when riesgo_datos = '1' else IR_ID(31 downto 26);
 
 
 
@@ -339,13 +350,13 @@ salto <= Branch AND Z;
 -- si no es aritmética le damos el valor de la suma (000)
 ALUctrl_ID <= IR_ID(2 downto 0) when IR_ID(31 downto 26)= "000001" else "000"; 
 -- hay que añadir los campos necesarios a los registros intermedios
-Banco_ID_EX: Banco_EX PORT MAP ( clk => clk, reset => reset, load => '1', busA => busA, busB => busB, busA_EX => busA_EX, busB_EX => busB_EX,
+Banco_ID_EX: Banco_EX PORT MAP ( clk => clk, reset => reset, load => load_ID_EX, busA => busA, busB => busB, busA_EX => busA_EX, busB_EX => busB_EX,
 											RegDst_ID => RegDst_ID, ALUSrc_ID => ALUSrc_ID, MemWrite_ID => MemWrite_ID, MemRead_ID => MemRead_ID,
 											MemtoReg_ID => MemtoReg_ID, RegWrite_ID => RegWrite_ID, RegDst_EX => RegDst_EX, ALUSrc_EX => ALUSrc_EX,
 											MemWrite_EX => MemWrite_EX, MemRead_EX => MemRead_EX, MemtoReg_EX => MemtoReg_EX, RegWrite_EX => RegWrite_EX,
 											ALUctrl_ID => ALUctrl_ID, ALUctrl_EX => ALUctrl_EX, inm_ext => inm_ext, inm_ext_EX=> inm_ext_EX,
 											Reg_Rt_ID => IR_ID(20 downto 16), Reg_Rd_ID => IR_ID(15 downto 11), Reg_Rt_EX => Reg_Rt_EX, Reg_Rd_EX => Reg_Rd_EX,
-                      RS_ID => IR_ID(25 downto 21), RS_EX => RS_EX, Update_Rs_ID => Update_Rs_ID, Update_Rs_EX => Update_Rs_EX);			
+                      RS_ID => IR_ID(25 downto 21), RS_EX => RS_EX, Update_Rs_ID => Update_Rs_ID, Update_Rs_EX => Update_Rs_EX, op_code_ID => op_code_ID, op_code_EX => op_code_EX);			
 							
 --
 ------------------------------------------Etapa EX-------------------------------------------------------------------
@@ -357,13 +368,22 @@ ALU_MIPs: ALU PORT MAP ( DA => BusA_EX, DB => Mux_out, ALUctrl => ALUctrl_EX, Do
 
 mux_dst: mux2_5bits port map (Din0 => Reg_Rt_EX, DIn1 => Reg_Rd_EX, ctrl => RegDst_EX, Dout => RW_EX);
 
-Banco_EX_MEM: Banco_MEM PORT MAP ( ALU_out_EX => ALU_out_EX, ALU_out_MEM => ALU_out_MEM, clk => clk, reset => reset, load => '1', MemWrite_EX => MemWrite_EX,
+Banco_EX_MEM: Banco_MEM PORT MAP ( ALU_out_EX => ALU_out_EX, ALU_out_MEM => ALU_out_MEM, clk => clk, reset => reset, load => load_EX_MEM, MemWrite_EX => MemWrite_EX,
 												MemRead_EX => MemRead_EX, MemtoReg_EX => MemtoReg_EX, RegWrite_EX => RegWrite_EX, MemWrite_MEM => MemWrite_MEM, MemRead_MEM => MemRead_MEM,
 												MemtoReg_MEM => MemtoReg_MEM, RegWrite_MEM => RegWrite_MEM, BusB_EX => BusB_EX, BusB_MEM => BusB_MEM, RW_EX => RW_EX, RW_MEM => RW_MEM,
-                        RS_EX => RS_EX, RS_MEM => RS_MEM, Update_Rs_EX => Update_Rs_EX, Update_Rs_MEM => Update_Rs_MEM);
+                        RS_EX => RS_EX, RS_MEM => RS_MEM, Update_Rs_EX => Update_Rs_EX, Update_Rs_MEM => Update_Rs_MEM, op_code_EX => op_code_EX, op_code_MEM => op_code_MEM);
 --
 ------------------------------------------Etapa MEM-------------------------------------------------------------------
 --
+
+--Riesgos de bus
+riesgo_lw <= '1' when (MEM_STALL = '1' and op_code_MEM = "000010") else '0'; --Si mem_stall está a 1 y la instrucción en MEM es un LW
+riesgo_sw <= '1' when (MEM_STALL = '1' and op_code_MEM = "000011") else '0'; --Si mem_stall está a 1 y la instrucción en MEM es un SW
+riesgo_lw_pre <= '1' when (MEM_STALL = '1' and op_code_MEM = "000110") else '0'; --Si mem_stall está a 1 y la instrucción en MEM es un LW_pre
+riesgo_sw_pre <= '1' when (MEM_STALL = '1' and op_code_MEM = "000111") else '0'; --Si mem_stall está a 1 y la instrucción en MEM es un SW_pre
+
+--Si se activa alguno de los riesgos anteriores se activa el riesgo_bus.
+riesgo_bus <= '1' when (riesgo_lw = '1' or riesgo_sw = '1' or riesgo_lw_pre = '1' or riesgo_sw_pre = '1') else '0';
 
 MD_IO: MD_mas_I_O PORT MAP (CLK => CLK, ADDR => ALU_out_MEM, Din => BusB_MEM, WE => MemWrite_MEM, RE => MemRead_MEM, MEM_STALL => MEM_STALL,
  Dout => Mem_out, reset => reset);

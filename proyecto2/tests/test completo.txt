@@ -1,0 +1,76 @@
+formato aritméticas: 
+op	rs	rt	rd	shamt	funct
+000001	00001	00010  	00011  	00000	000000  ADD R3, R1, R2
+
+formato lw, sw, beq:
+op	rs	rt		inm
+000010 	00000	00001 	0000000000000000 		LW  R1, 0(R0)  dir 0
+
+El valor inicial de los registros es 0 (partimos de un reset)
+El código está pensado para funcionar en un procesador con saltos 1-retardados que no detecta los riesgos de datos
+
+En las instrucciones de salto, para saber que inmediato debemos introducir en función del PC y de la dirección de salto
+viene dado por la siguiente expresión: Ext(Inm) = (dirSalto-PC-4)/4
+
+
+Vamos a realizar un programa que copie una tabla de una zona de memoria a otra usando instrucciones pre-incremento.
+Mientras el programa ejecuta, vamos a realizar una transferencia de MD a IO. Vamos a transferir 4 palabras de la dirección
+13 de MD a la dirección 2 de IO.
+
+
+Tenemos la siguiente información en memoria de datos.
+
+direcciones ->0,4,8,12,16,20
+datos		->5(tamaño de la tabla),4,5,9,2,A 			(DEBEN INTRODUCIRSE EN LA MEMORIA DE DATOS)
+
+Código
+-----------------------
+dir 0 	LW R5, 0(R0)				//R0=tamaño tabla
+dir 1 	LW_pre R30, 20(R2)			//Basura en R30 pero nos posicionamos al final de la tabla para empezar a mover
+									//(Es como hacer un mov a R2)
+dir 2 	LW_pre R29, 1(R4)			//Basura en R29 pero metemos un 1 en R4
+dir 3 	LW R6, 48(R0)				//Cargamos la orden de la transferencia que se encuentra en la dirección 12 en R6
+dir 4 	SW R6, 0200(R0)				//El MIPS escribe en el registro del DMA para que este inicie la transferencia
+dir 5 	LW_pre R0, 4(R1)			//Cargamos el primer dato y movemos cursor
+dir 6 	NOP R0, 8(R1) 				//Para engañar al procesador a ver si para
+dir 7 	ADD R3,R3,R4				//Incrementamos el contador
+dir 8 	SW_pre R0, 4(R2)			//Movemos el dato a otro lugar de memoria y movemos cursor
+dir 9	BEQ R3, R5, dir11			//Si hemos recorrido toda la tabla, fin del programa
+dir 10 	BEQ R0, R0, dir5			//Saltamos al inicio del bucle
+dir 11 	BEQ R0, R0, dir11			//Bucle infinito de finalización
+
+Separado por campos
+----------------------------------------
+
+
+000010 	00000	00101 	0000000000000000 				LW R5, 0(R0)			dir0
+000110 	00010	11110 	0000000000010100 				LW_pre R30, 20(R2)		dir1
+000110 	00100	11101 	0000000000000001 				LW_pre R29, 1(R4) 		dir2
+000010 	00000 	00110 	0000000000110000 				LW R6, 48(R0) 			dir3
+000011 	00000 	00110 	0000001000000000 				SW R6, 0200(R0) 		dir4
+000110 	00001	00000 	0000000000000100 				LW_pre R0, 4(R1) 		dir5
+000000 	00001 	00000 	0000000000001000 				NOP R0, 8(R1)			dir6 				
+000001	00011	00100  	00011  	00000	000000 			ADD R3,R3,R4 			dir7
+000111 	00010	00000 	0000000000000100 				SW_pre R0, 4(R2)		dir8
+000100 	00101	00011 	0000000000000001 				BEQ R3, R5, dir11		dir9
+000100 	00000	00000 	1111111111111010 				BEQ R0, R0, dir5		dir10
+000100 	00000	00000 	1111111111111111 				BEQ R0, R0, dir11		dir11
+
+
+En hexadecimal
+----------------------------------------
+
+				Bin 					  Hexa
+
+00001000000001010000000000000000		08050000		LW R5, 0(R0)				dir0
+00011000010111100000000000010100		185E0014		LW_pre R30, 20(R2)			dir1
+00011000100111010000000000000001		189D0001		LW_pre R29, 1(R4)			dir2
+00001000000001100000000000110000 		08060030		LW R6, 48(R0) 				dir3
+00001100000001100000001000000000 		0C060200		SW R6, 0200(R0) 			dir4
+00011000001000000000000000000100		18200004		LW_pre R0, 4(R1)			dir5
+00000000001000000000000000001000 		00200008 		NOP R0, 8(R1) 				dir6
+00000100011001000001100000000000		04641800		ADD R3,R3,R4				dir7
+00011100010000000000000000000100		1C400004 		SW_pre R0, 4(R2)			dir8
+00010000101000110000000000000001		10A30001 		BEQ R3, R5, dir11			dir9
+00010000000000001111111111111010		1000FFFA 		BEQ R0, R0, dir5			dir10
+00010000000000001111111111111111		1000FFFF 		BEQ R0, R0, dir11			dir11

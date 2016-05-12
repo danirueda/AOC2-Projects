@@ -60,7 +60,9 @@ entity Banco_EX is
            Reg_Rt_ID : in  STD_LOGIC_VECTOR (4 downto 0);
            Reg_Rd_ID : in  STD_LOGIC_VECTOR (4 downto 0);
            Reg_Rt_EX : out  STD_LOGIC_VECTOR (4 downto 0);
-           Reg_Rd_EX : out  STD_LOGIC_VECTOR (4 downto 0));
+           Reg_Rd_EX : out  STD_LOGIC_VECTOR (4 downto 0);
+		   op_code_ID : in STD_LOGIC_VECTOR (5 downto 0);
+		   op_code_EX : out STD_LOGIC_VECTOR (5 downto 0));
 end Banco_EX;
 
 architecture Behavioral of Banco_EX is
@@ -84,6 +86,7 @@ SYNC_PROC: process (clk)
 				ALUctrl_EX <= "000";
 				RS_EX <= "00000";
 				Update_Rs_EX <= '0';
+				op_code_EX <= "000000";
          else
             if (load='1') then 
 					busA_EX <= busA;
@@ -100,6 +103,7 @@ SYNC_PROC: process (clk)
 					inm_ext_EX <= inm_ext;
 					RS_EX <= RS_ID;
 					Update_Rs_EX <= Update_Rs_ID;
+					op_code_EX <= op_code_ID;
 				end if;	
          end if;        
       end if;

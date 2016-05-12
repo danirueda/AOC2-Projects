@@ -50,7 +50,9 @@ Port ( 	ALU_out_EX : in  STD_LOGIC_VECTOR (31 downto 0);
 			Update_Rs_EX : in STD_LOGIC;
 			Update_Rs_MEM : out STD_LOGIC;
 			RW_EX : in  STD_LOGIC_VECTOR (4 downto 0); -- registro destino de la escritura
-         RW_MEM : out  STD_LOGIC_VECTOR (4 downto 0)); -- PC+4 en la etapa ID
+         RW_MEM : out  STD_LOGIC_VECTOR (4 downto 0); -- PC+4 en la etapa ID
+         op_code_EX : in STD_LOGIC_VECTOR (5 downto 0);
+		   op_code_MEM : out STD_LOGIC_VECTOR (5 downto 0));
 end Banco_MEM;
 
 architecture Behavioral of Banco_MEM is
@@ -69,6 +71,7 @@ SYNC_PROC: process (clk)
 				RegWrite_MEM <= '0';
 				RS_MEM <= "00000";
 				Update_Rs_MEM <= '0';
+				op_code_MEM <= "000000";
          else
             if (load='1') then 
 					ALU_out_MEM <= ALU_out_EX;
@@ -80,6 +83,7 @@ SYNC_PROC: process (clk)
 					RegWrite_MEM <= RegWrite_EX;
 					RS_MEM <= RS_EX;
 					Update_Rs_MEM <= Update_Rs_EX;
+					op_code_MEM <= op_code_EX;
 				end if;	
          end if;        
       end if;
