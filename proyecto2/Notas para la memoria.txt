@@ -1,0 +1,5 @@
+Notas
+--------------------------
+-Llevado el codigo de operación hasta la etapa MEM para poder identificar el riesgo de MEM_stall.
+-La memoria va incrementando direcciones ciclo a ciclo y hay que subir el wait en el mismo ciclo
+en el que la memoria te da el dato.

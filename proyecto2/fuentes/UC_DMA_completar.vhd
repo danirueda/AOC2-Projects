@@ -89,9 +89,9 @@ begin
 			  DMA_IO_WE <= '1';
 			  DMA_sync <= '1';
 			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
+			  DMA_send_addr <= '1'; -- pido dir de memoria
 			  DMA_Burst <= '1';
-			  DMA_wait <= '0';
+			  DMA_wait <= '1'; --la ponemos a 1 porque sino al siguiente ciclo la MD nos da otra dirección
 	          next_state <= sincro_escribirIO;
           elsif (empezar = '1' and Bus_Req = '0' and L_E = '1') then
           --Solicitamos lectura en IO y esperamos a que nos responda
@@ -273,9 +273,9 @@ begin
 			  DMA_IO_WE <= '1';
 			  DMA_sync <= '1';
 			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
+			  DMA_send_addr <= '1';
 			  --DMA_Burst <= '1';
-			  DMA_wait <= '0';
+			  DMA_wait <= '1';
 	          next_state <= sincro_escribirIO;
 	   		elsif (IO_sync = '0' and fin = '1') then
 	   		--Si nos dicen que terminamos y el IO baja su señal de sincronización el DMA baja su señal de sincronización.
