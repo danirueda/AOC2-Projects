@@ -133,10 +133,10 @@ begin
 			  update_done <= '0';
 			  reset_count <= '0';
 			  count_enable <= '0';
-			  load_data <= '0';
+			  load_data <= '1';
 			  DMA_MD_RE <= '0';
 			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '0';
+			  DMA_IO_RE <= '1';
 			  DMA_IO_WE <= '0';
 			  DMA_sync <= '1';
 			  DMA_send_data <= '0';
@@ -149,7 +149,7 @@ begin
 			  update_done <= '0';
 			  reset_count <= '0';
 			  count_enable <= '0';
-			  load_data <= '1';
+			  load_data <= '0';
 			  DMA_MD_RE <= '0';
 			  DMA_MD_WE <= '0';
 			  DMA_IO_RE <= '0';

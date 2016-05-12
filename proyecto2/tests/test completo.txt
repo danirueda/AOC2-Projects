@@ -17,6 +17,13 @@ Vamos a realizar un programa que copie una tabla de una zona de memoria a otra u
 Mientras el programa ejecuta, vamos a realizar una transferencia de MD a IO. Vamos a transferir 4 palabras de la dirección
 13 de MD a la dirección 2 de IO.
 
+##############################################################################################################
+NOTA: VAMOS A CAMBIAR DE MEMORIA DE DATOS LA ORDEN DE LA TRANSFERENCIA PARA QUE LEA DE IO Y ESCRIBA EN MD.
+LUEGO CONVENDRÍA METER EN MEDIO DEL BUCLE ESTA TRANSFERENCIA.
+
+VAMOS A TRANSMITIR 4 PALABRAS DE LA DIRECCIÓN 2 DE IO A LA DIRECCIÓN 13 DE MD.
+##############################################################################################################
+
 
 Tenemos la siguiente información en memoria de datos.
 
