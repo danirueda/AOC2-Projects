@@ -107,7 +107,7 @@ begin
 			  DMA_send_data <= '0';
 			  DMA_send_addr <= '0';
 			  DMA_Burst <= '1';
-			  DMA_wait <= '0';
+			  DMA_wait <= '1';
 	          next_state <= sincro_leerIO;
           else
           --Si no ocurre ningún evento de los anteriores, las señales permanecen a 0. 
@@ -127,9 +127,25 @@ begin
 	          next_state <= inicio;
           end if;  	
        elsif (state = sincro_leerIO) then
-			if (IO_sync = '0') then
+			if (IO_sync = '0' and fin = '0') then
 			--Si IO_sync no nos responde, activamos la señal de wait para que el DMA diga a los demas que no puede continuar
 			--con la transferencia
+			  update_done <= '0';
+			  reset_count <= '0';
+			  count_enable <= '0';
+			  load_data <= '0';
+			  DMA_MD_RE <= '0';
+			  DMA_MD_WE <= '0';
+			  DMA_IO_RE <= '1';
+			  DMA_IO_WE <= '0';
+			  DMA_sync <= '1';
+			  DMA_send_data <= '0';
+			  DMA_send_addr <= '0';
+			  --DMA_Burst <= '0';
+			  DMA_wait <= '1';
+	          next_state <= sincro_leerIO;
+			elsif (IO_sync = '1') then
+			--Cuando IO nos ha respondido cargamos el dato en el registro, bajamos DMA_wait y la señal de sincronización
 			  update_done <= '0';
 			  reset_count <= '0';
 			  count_enable <= '0';
@@ -143,10 +159,9 @@ begin
 			  DMA_send_addr <= '0';
 			  --DMA_Burst <= '0';
 			  DMA_wait <= '1';
-	          next_state <= sincro_leerIO;
-			else --IO_sync = '1'
-			--Cuando IO nos ha respondido cargamos el dato en el registro, bajamos DMA_wait y la señal de sincronización
-			  update_done <= '0';
+	          next_state <= leerIO;
+	        elsif (IO_sync = '0' and fin = '1') then
+	          update_done <= '1';
 			  reset_count <= '0';
 			  count_enable <= '0';
 			  load_data <= '0';
@@ -157,9 +172,9 @@ begin
 			  DMA_sync <= '0';
 			  DMA_send_data <= '0';
 			  DMA_send_addr <= '0';
-			  --DMA_Burst <= '0';
+			  DMA_Burst <= '0';
 			  DMA_wait <= '0';
-	          next_state <= leerIO;
+	          next_state <= inicio;
 			end if;
        elsif (state = sincro_escribirIO) then
        		if (IO_sync = '0') then
@@ -222,27 +237,12 @@ begin
 			  DMA_MD_WE <= '1';
 			  DMA_IO_RE <= '1';
 			  DMA_IO_WE <= '0';
-			  DMA_sync <= '1';
+			  DMA_sync <= '0';
 			  DMA_send_data <= '1';
 			  DMA_send_addr <= '1';
 			  --DMA_Burst <= '1';
 			  DMA_wait <= '0';
 	          next_state <= sincro_leerIO;
-	   		elsif (IO_sync = '0' and fin = '1') then
-	   		  update_done <= '1';
-			  reset_count <= '0';
-			  count_enable <= '1';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '1';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '0';
-			  DMA_send_data <= '1';
-			  DMA_send_addr <= '1';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= inicio;
 	   		end if;
 	   elsif (state = escribirIO) then
 	   		if (IO_sync = '1') then
