@@ -17,13 +17,6 @@ Vamos a realizar un programa que copie una tabla de una zona de memoria a otra u
 Mientras el programa ejecuta, vamos a realizar una transferencia de MD a IO. Vamos a transferir 4 palabras de la dirección
 13 de MD a la dirección 2 de IO.
 
-##############################################################################################################
-NOTA: VAMOS A CAMBIAR DE MEMORIA DE DATOS LA ORDEN DE LA TRANSFERENCIA PARA QUE LEA DE IO Y ESCRIBA EN MD.
-LUEGO CONVENDRÍA METER EN MEDIO DEL BUCLE ESTA TRANSFERENCIA.
-
-VAMOS A TRANSMITIR 4 PALABRAS DE LA DIRECCIÓN 2 DE IO A LA DIRECCIÓN 13 DE MD.
-##############################################################################################################
-
 
 Tenemos la siguiente información en memoria de datos.
 
@@ -36,15 +29,29 @@ dir 0 	LW R5, 0(R0)				//R0=tamaño tabla
 dir 1 	LW_pre R30, 20(R2)			//Basura en R30 pero nos posicionamos al final de la tabla para empezar a mover
 									//(Es como hacer un mov a R2)
 dir 2 	LW_pre R29, 1(R4)			//Basura en R29 pero metemos un 1 en R4
+
+///////////////////////INICIO DE UNA TRANSFERENCIA DE MD A IO////////////////////////////////////////////////////////
 dir 3 	LW R6, 48(R0)				//Cargamos la orden de la transferencia que se encuentra en la dirección 12 en R6
 dir 4 	SW R6, 0200(R0)				//El MIPS escribe en el registro del DMA para que este inicie la transferencia
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 dir 5 	LW_pre R0, 4(R1)			//Cargamos el primer dato y movemos cursor
 dir 6 	NOP R0, 8(R1) 				//Para engañar al procesador a ver si para
-dir 7 	ADD R3,R3,R4				//Incrementamos el contador
-dir 8 	SW_pre R0, 4(R2)			//Movemos el dato a otro lugar de memoria y movemos cursor
-dir 9	BEQ R3, R5, dir11			//Si hemos recorrido toda la tabla, fin del programa
-dir 10 	BEQ R0, R0, dir5			//Saltamos al inicio del bucle
-dir 11 	BEQ R0, R0, dir11			//Bucle infinito de finalización
+
+/////////////////////CONFIGURACION E INICIO DE UNA TRANSFERENCIA CAMBIANTE DE QUE TRANSMITIRÁ PALABRAS DE IO A MD/////
+/////////////////////CAMBIANDO LA DIRECCIÓN DE INICIO DE LA MD POR CADA ITERACIÓN DEL PROGRAMA////////////////////////
+dir 7 	LW R6, 44(R7)				//Cargamos el dato de la direccion 44
+dir 8 	ADD R6,R6,R4 				//Le sumamos uno para que vaya haciendo una transferencia diferente en cada iteración
+dir 9 	SW R6, 44(R7) 				//Guardamos el dato actualizado para la siguiente iteración
+dir 10 	SW R6, 0200(R7) 			//Iniciamos transferencia
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+dir 11 	ADD R3,R3,R4				//Incrementamos el contador
+dir 12 	SW_pre R0, 4(R2)			//Movemos el dato a otro lugar de memoria y movemos cursor
+dir 13	BEQ R3, R5, dir11			//Si hemos recorrido toda la tabla, fin del programa
+dir 14 	BEQ R0, R0, dir5			//Saltamos al inicio del bucle
+dir 15 	BEQ R0, R0, dir11			//Bucle infinito de finalización
 
 Separado por campos
 ----------------------------------------
@@ -53,15 +60,31 @@ Separado por campos
 000010 	00000	00101 	0000000000000000 				LW R5, 0(R0)			dir0
 000110 	00010	11110 	0000000000010100 				LW_pre R30, 20(R2)		dir1
 000110 	00100	11101 	0000000000000001 				LW_pre R29, 1(R4) 		dir2
+
+
+////////////////////////////////TRANSFERENCIA/////////////////////////////////////////////
 000010 	00000 	00110 	0000000000110000 				LW R6, 48(R0) 			dir3
 000011 	00000 	00110 	0000001000000000 				SW R6, 0200(R0) 		dir4
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 000110 	00001	00000 	0000000000000100 				LW_pre R0, 4(R1) 		dir5
-000000 	00001 	00000 	0000000000001000 				NOP R0, 8(R1)			dir6 				
-000001	00011	00100  	00011  	00000	000000 			ADD R3,R3,R4 			dir7
-000111 	00010	00000 	0000000000000100 				SW_pre R0, 4(R2)		dir8
-000100 	00101	00011 	0000000000000001 				BEQ R3, R5, dir11		dir9
-000100 	00000	00000 	1111111111111010 				BEQ R0, R0, dir5		dir10
-000100 	00000	00000 	1111111111111111 				BEQ R0, R0, dir11		dir11
+000000 	00001 	00000 	0000000000001000 				NOP R0, 8(R1)			dir6
+
+
+///////////////////////////////TRNASFERENCIA/////////////////////////////////////////////
+000010	00111 	00110 	0000000000101100				LW R6, 44(R7) 			dir7
+000001 	00110 	00100 	00110 	00000 	000000			ADD R6,R6,R4 			dir8
+000011	00111 	00110 	0000000000101100 				SW R6, 44(R7) 			dir9
+000011 	00111 	00110 	0000001000000000				SW R6, 0200(R7) 		dir10
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+000001	00011	00100  	00011  	00000	000000 			ADD R3,R3,R4 			dir11
+000111 	00010	00000 	0000000000000100 				SW_pre R0, 4(R2)		dir12
+000100 	00101	00011 	0000000000000001 				BEQ R3, R5, dir15		dir13
+000100 	00000	00000 	1111111111110111 				BEQ R0, R0, dir5		dir14
+000100 	00000	00000 	1111111111111111 				BEQ R0, R0, dir15		dir15
 
 
 En hexadecimal
@@ -72,12 +95,30 @@ En hexadecimal
 00001000000001010000000000000000		08050000		LW R5, 0(R0)				dir0
 00011000010111100000000000010100		185E0014		LW_pre R30, 20(R2)			dir1
 00011000100111010000000000000001		189D0001		LW_pre R29, 1(R4)			dir2
+
+/////////////////////////////////TRANSFERENCIA////////////////////////////////////////////
 00001000000001100000000000110000 		08060030		LW R6, 48(R0) 				dir3
 00001100000001100000001000000000 		0C060200		SW R6, 0200(R0) 			dir4
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 00011000001000000000000000000100		18200004		LW_pre R0, 4(R1)			dir5
 00000000001000000000000000001000 		00200008 		NOP R0, 8(R1) 				dir6
-00000100011001000001100000000000		04641800		ADD R3,R3,R4				dir7
-00011100010000000000000000000100		1C400004 		SW_pre R0, 4(R2)			dir8
-00010000101000110000000000000001		10A30001 		BEQ R3, R5, dir11			dir9
-00010000000000001111111111111010		1000FFFA 		BEQ R0, R0, dir5			dir10
-00010000000000001111111111111111		1000FFFF 		BEQ R0, R0, dir11			dir11
+
+
+////////////////////////////////////TRANSFERENCIA/////////////////////////////////////////
+00001000111001100000000000101100		08E6002C		LW R6, 44(R7) 				dir7
+00000100110001000011000000000000		04C43000		ADD R6,R6,R4 				dir8
+00001100111001100000000000101100 		0CE6002C		SW R6, 44(R7) 				dir9
+00001100111001100000001000000000		0CE60200		SW R6, 0200(R7) 			dir10
+//////////////////////////////////////////////////////////////////////////////////////////
+
+00000100011001000001100000000000 		04641800		ADD R3,R3,R4 				dir11
+00011100010000000000000000000100 		1C400004		SW_pre R0, 4(R2)			dir12
+00010000101000110000000000000001 		10A30001		BEQ R3, R5, dir15			dir13
+00010000000000001111111111110111 		1000FFF7		BEQ R0, R0, dir5			dir14
+00010000000000001111111111111111 		1000FFFF		BEQ R0, R0, dir15			dir15
+
+
+
+
