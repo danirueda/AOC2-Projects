@@ -248,7 +248,7 @@ begin
 			  load_data <= '0';
 			  DMA_MD_RE <= '0';
 			  DMA_MD_WE <= '1';
-			  DMA_IO_RE <= '1';
+			  DMA_IO_RE <= '0';
 			  DMA_IO_WE <= '0';
 			  DMA_sync <= '0';
 			  DMA_send_data <= '1';
