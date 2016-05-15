@@ -55,7 +55,8 @@ component UC_DMA is
     Port ( clk : in  STD_LOGIC;
           reset : in  STD_LOGIC;
           empezar: in  STD_LOGIC;
-          fin: in  STD_LOGIC; --
+          fin: in  STD_LOGIC;
+          robo: in STD_LOGIC;
           L_E: in  STD_LOGIC;  -- 0 lectura de memoria, 1 escritura en memoria
           Bus_Req: in std_logic;        -- solicitud del mips
 		  IO_sync: in std_logic; -- señal de sincro con el periférico
@@ -150,8 +151,8 @@ addr_MD: reg8 port map (Din => Bus_data(7 downto 0), clk => clk, reset => reset,
  
  DMA_addr_IO <= palabra_inicial_IO(6 downto 0) + cuenta_palabras(6 downto 0); -- dirección para el periferico
 
- palabra_MD <= palabra_inicial_MD + cuenta_palabras; --aquí no sumamos porque ya lo hace el controlador de MD
- 
+ palabra_MD <= (palabra_inicial_MD + cuenta_palabras) when reg_DMA(26) = '1' else palabra_inicial_MD;
+
  DMA_Addr <= "0000000000000000000000"&palabra_MD&"00"; -- Dirección de la MD
  --------------------------------------------------------------------------------------------
  -- detección del fin

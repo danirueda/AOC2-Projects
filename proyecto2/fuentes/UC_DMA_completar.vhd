@@ -33,7 +33,8 @@ entity UC_DMA is
      Port ( clk : in  STD_LOGIC;
           reset : in  STD_LOGIC;
           empezar: in  STD_LOGIC;
-          fin: in  STD_LOGIC; --
+          fin: in  STD_LOGIC;
+          robo : in STD_LOGIC; -- señal para trabajar en robo de ciclo
           L_E: in  STD_LOGIC;  -- 0 lees de MD y escribes en IO, 1 viceversa
           Bus_Req: in std_logic; -- solicitud del mips
 		  IO_sync: in std_logic; -- señal de sincro con el periférico
@@ -54,7 +55,8 @@ entity UC_DMA is
 end UC_DMA;
 
 architecture Behavioral of UC_DMA is
-   type state_type is (inicio, sincro_leerIO, sincro_escribirIO, leerIO, escribirIO) ; 
+   type state_type is (inicio, sincro_leerIO, sincro_escribirIO, leerIO, escribirIO,
+   	robo_sincro_leerIO, robo_leerIO, robo_sincro_escribirIO, robo_escribirIO); 
    signal state, next_state : state_type; 
    
 begin
@@ -73,214 +75,88 @@ begin
    end process;
  
 --MEALY State-Machine - Outputs based on state and inputs
-   OUTPUT_DECODE: process (state, empezar, fin, L_E, Bus_Req, IO_sync) --lista de sensibilidad
+   OUTPUT_DECODE: process (state, empezar, fin, L_E, Bus_Req, IO_sync, robo) --lista de sensibilidad
    begin  
-       if (state = inicio) then -- si no piden nada no hacemos nada
-          if (empezar = '1' and Bus_Req = '0' and L_E = '0') then
-          	  update_done <= '0';
-			  reset_count <= '1';
-			  count_enable <= '0';
-			  load_data <= '1';
-			  DMA_MD_RE <= '1'; 
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '0';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '1'; 
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0'; 
-	          next_state <= sincro_escribirIO;
-          elsif (empezar = '1' and L_E = '1') then
-          	  update_done <= '0';
-			  reset_count <= '1';
-			  count_enable <= '0';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '1';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '1';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= sincro_leerIO;
-          else
-	          update_done <= '0';
-			  reset_count <= '0';
-			  count_enable <= '0';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '0';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= inicio;
-          end if;  	
-       elsif (state = sincro_leerIO) then
-			if (IO_sync = '0' and fin = '0') then
-			  update_done <= '0';
-			  reset_count <= '0';
-			  count_enable <= '0';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '1';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '1';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= sincro_leerIO;
-			elsif (IO_sync = '1') then
-			  update_done <= '0';
-			  reset_count <= '0';
-			  count_enable <= '0';
-			  load_data <= '1';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '1';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '1';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= leerIO;
-	        elsif (fin = '1') then
-	          update_done <= '1';
-			  reset_count <= '0';
-			  count_enable <= '0';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '0';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= inicio;
-			end if;
-       elsif (state = sincro_escribirIO) then
-       		if (IO_sync = '0' and fin = '0') then
-       		  update_done <= '0';
-			  reset_count <= '0';
-			  count_enable <= '0';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '1';
-			  DMA_sync <= '1';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= sincro_escribirIO;
+       if(state = inicio) then
+	       	if(L_E = '1' AND empezar = '1' AND robo = '1') then
+	       		update_done <= '0';
+				DMA_send_data <= '0';
+				DMA_send_addr <= '0';
+				DMA_Burst <= '0';
+				DMA_wait <= '0';
+				reset_count <= '0';
+				count_enable <= '0'; 
+				load_data <= '0';
+				DMA_MD_RE <= '0';
+				DMA_MD_WE <= '0';
+				DMA_IO_RE <= '0';
+				DMA_IO_WE <= '0';
+				DMA_sync <= '0';
+				next_state <= robo_sincro_leerIO;
+	       	elsif (L_E = '1' AND empezar = '1' AND Bus_Req = '0' AND robo = '0') then
+	       	  	next_state <= sincro_leerIO;
+	       	elsif (L_E = '0' AND empezar = '1' AND Bus_Req = '0' and robo = '0') then
+	       	  	next_state <= sincro_escribirIO;
+	       	elsif (L_E = '0' AND empezar = '1' AND Bus_Req = '0' AND robo = '1') then
+	       	  	next_state <= robo_sincro_escribirIO;
+	       	end if;   
+       elsif (state = robo_sincro_leerIO) then
+       		if(IO_sync = '0' AND fin = '0') then
+       			next_state <= robo_sincro_leerIO;
        		elsif (IO_sync = '1') then
-       		  update_done <= '0';
-			  reset_count <= '0';
-			  count_enable <= '0';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '1';
-			  DMA_sync <= '1';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= escribirIO;
-	        elsif (fin = '1') then
-	          update_done <= '1';
-			  reset_count <= '0';
-			  count_enable <= '0';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '0';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= inicio; 
-       		end if;
-	   elsif (state = leerIO) then
-	   		if (IO_sync = '1' or Bus_Req = '1') then
-	   		  update_done <= '0';
-			  reset_count <= '0';
-			  count_enable <= '0';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '0';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= leerIO;
-	   		elsif (IO_sync = '0' and Bus_Req = '0') then 
-	   		  update_done <= '0';
-			  reset_count <= '0';
-			  count_enable <= '1';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '1';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '0';
-			  DMA_send_data <= '1';
-			  DMA_send_addr <= '1';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= sincro_leerIO;
-	   		end if;
-	   elsif (state = escribirIO) then
-	   		if (IO_sync = '1' or Bus_Req = '1') then
-	   		  update_done <= '0';
-			  reset_count <= '0';
-			  count_enable <= '0';
-			  load_data <= '0';
-			  DMA_MD_RE <= '0';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '0';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '0';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= escribirIO;
-	   		elsif (IO_sync = '0' and Bus_Req = '0') then 
-	   		  update_done <= '0';
-			  reset_count <= '0';
-			  count_enable <= '1';
-			  load_data <= '1';
-			  DMA_MD_RE <= '1';
-			  DMA_MD_WE <= '0';
-			  DMA_IO_RE <= '0';
-			  DMA_IO_WE <= '0';
-			  DMA_sync <= '0';
-			  DMA_send_data <= '0';
-			  DMA_send_addr <= '1';
-			  DMA_Burst <= '0';
-			  DMA_wait <= '0';
-	          next_state <= sincro_escribirIO;
-	   		end if;   
-	   end if;
+       			next_state <= robo_leerIO;
+       		elsif (fin = '1') then
+       			next_state <= inicio;
+       		end if;  
+       elsif (state = robo_leerIO) then
+       		if(IO_sync = '1' OR Bus_Req = '1') then
+       			next_state <= robo_leerIO;
+       		elsif (IO_sync = '0' AND Bus_Req = '0') then
+       			next_state <= robo_sincro_leerIO;
+       		end if; 
+       elsif (state = sincro_leerIO) then
+       		if (IO_sync = '0' AND fin = '0') then
+       			next_state <= sincro_leerIO;
+       		elsif (IO_sync = '1') then
+       			next_state <= leerIO;
+       		elsif (fin = '1') then
+       			next_state <= inicio;
+       		end if;  
+       elsif (state = leerIO) then
+       		if (IO_sync = '1') then
+       			next_state <= leerIO;
+       		elsif (IO_sync = '0') then
+       			next_state <= sincro_leerIO;
+       		end if; 
+       elsif (state = robo_sincro_escribirIO) then
+       		if (IO_sync = '0' AND fin = '0') then
+       			next_state <= robo_sincro_escribirIO;
+       		elsif (IO_sync = '1') then
+       			next_state <= robo_escribirIO;
+       		elsif (fin = '1') then
+       			next_state <= inicio;
+       		end if;  
+       elsif (state = robo_escribirIO) then
+       		if (IO_sync = '1' OR Bus_Req = '1')
+       			next_state <= robo_escribirIO;
+       		elsif (IO_sync = '0' AND Bus_Req = '0') then
+       			next_state <= robo_sincro_escribirIO;
+       		end if; 
+       elsif (state = sincro_escribirIO) then
+       		if (IO_sync = '0' AND fin = '0') then
+       			next_state <= sincro_escribirIO;
+       		elsif (IO_sync = '1') then
+       			next_state <= escribirIO;
+       		elsif (fin = '1') then
+       			next_state <= inicio;
+       		end if;  
+       elsif (state = escribirIO) then
+       		if (IO_sync = '1') then
+       			next_state <= escribirIO;
+       		elsif (IO_sync = '0') then
+       			next_state <= sincro_escribirIO;
+       		end if; 
+       end if;        
    end process;
  
    
