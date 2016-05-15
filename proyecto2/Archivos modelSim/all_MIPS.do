@@ -25,6 +25,7 @@ add wave -noupdate -group MD -label RE /testbench/uut/MD_IO/controlador_MD/MD/RE
 add wave -noupdate -group MD -label WE /testbench/uut/MD_IO/controlador_MD/MD/WE
 add wave -noupdate -expand -group UC_DMA -label empezar /testbench/uut/MD_IO/Controlador_DMA/UC/empezar
 add wave -noupdate -expand -group UC_DMA -label fin /testbench/uut/MD_IO/Controlador_DMA/UC/fin
+add wave -noupdate -expand -group UC_DMA -color Gold -label robo /testbench/uut/MD_IO/Controlador_DMA/UC/robo
 add wave -noupdate -expand -group UC_DMA -label Bus_Req /testbench/uut/MD_IO/Controlador_DMA/UC/Bus_Req
 add wave -noupdate -expand -group UC_DMA -label L_E /testbench/uut/MD_IO/Controlador_DMA/UC/L_E
 add wave -noupdate -expand -group UC_DMA -label state /testbench/uut/MD_IO/Controlador_DMA/UC/state
@@ -43,22 +44,22 @@ add wave -noupdate -expand -group UC_DMA -label count_enable /testbench/uut/MD_I
 add wave -noupdate -expand -group UC_DMA -label load_data /testbench/uut/MD_IO/Controlador_DMA/UC/load_data
 add wave -noupdate -expand -group UC_DMA -label reset_count /testbench/uut/MD_IO/Controlador_DMA/UC/reset_count
 add wave -noupdate -expand -group UC_DMA -label update_done /testbench/uut/MD_IO/Controlador_DMA/UC/update_done
-add wave -noupdate -group InfoTransferDMA -label DMA/num_palabras/Dout /testbench/uut/MD_IO/Controlador_DMA/num_palabras/Dout
-add wave -noupdate -group InfoTransferDMA -label addr_IO/Dout /testbench/uut/MD_IO/Controlador_DMA/addr_IO/Dout
-add wave -noupdate -group InfoTransferDMA -label addr_MD/Dout /testbench/uut/MD_IO/Controlador_DMA/addr_MD/Dout
-add wave -noupdate -group InfoTransferDMA -label DMA/cont_palabras/count /testbench/uut/MD_IO/Controlador_DMA/cont_palabras/count
-add wave -noupdate -group InfoTransferDMA -label DMA/control/Dout /testbench/uut/MD_IO/Controlador_DMA/control/Dout
-add wave -noupdate -expand -group DMA/reg_data -label Dout /testbench/uut/MD_IO/Controlador_DMA/reg_data/Dout
-add wave -noupdate -expand -group DMA/reg_data -label load /testbench/uut/MD_IO/Controlador_DMA/reg_data/load
-add wave -noupdate -expand -group IO -label ADDR /testbench/uut/MD_IO/IO/ADDR
-add wave -noupdate -expand -group IO -label Dout /testbench/uut/MD_IO/IO/Dout
-add wave -noupdate -expand -group IO -color {Orange Red} -label DMA_sync /testbench/uut/MD_IO/IO/DMA_sync
-add wave -noupdate -expand -group IO -color {Orange Red} -label IO_sync /testbench/uut/MD_IO/IO/IO_sync
-add wave -noupdate -expand -group IO -label RAM /testbench/uut/MD_IO/IO/RAM
-add wave -noupdate -expand -group IO -label RE /testbench/uut/MD_IO/IO/RE
-add wave -noupdate -expand -group IO -label WE /testbench/uut/MD_IO/IO/WE
+add wave -noupdate -expand -group InfoTransferDMA -label DMA/num_palabras/Dout /testbench/uut/MD_IO/Controlador_DMA/num_palabras/Dout
+add wave -noupdate -expand -group InfoTransferDMA -label addr_IO/Dout /testbench/uut/MD_IO/Controlador_DMA/addr_IO/Dout
+add wave -noupdate -expand -group InfoTransferDMA -label addr_MD/Dout /testbench/uut/MD_IO/Controlador_DMA/addr_MD/Dout
+add wave -noupdate -expand -group InfoTransferDMA -label DMA/cont_palabras/count /testbench/uut/MD_IO/Controlador_DMA/cont_palabras/count
+add wave -noupdate -expand -group InfoTransferDMA -label DMA/control/Dout /testbench/uut/MD_IO/Controlador_DMA/control/Dout
+add wave -noupdate -group DMA/reg_data -label Dout /testbench/uut/MD_IO/Controlador_DMA/reg_data/Dout
+add wave -noupdate -group DMA/reg_data -label load /testbench/uut/MD_IO/Controlador_DMA/reg_data/load
+add wave -noupdate -group IO -label ADDR /testbench/uut/MD_IO/IO/ADDR
+add wave -noupdate -group IO -label Dout /testbench/uut/MD_IO/IO/Dout
+add wave -noupdate -group IO -color {Orange Red} -label DMA_sync /testbench/uut/MD_IO/IO/DMA_sync
+add wave -noupdate -group IO -color {Orange Red} -label IO_sync /testbench/uut/MD_IO/IO/IO_sync
+add wave -noupdate -group IO -label RAM /testbench/uut/MD_IO/IO/RAM
+add wave -noupdate -group IO -label RE /testbench/uut/MD_IO/IO/RE
+add wave -noupdate -group IO -label WE /testbench/uut/MD_IO/IO/WE
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {131 ns} 0}
+WaveRestoreCursors {{Cursor 1} {130 ns} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -74,4 +75,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {111 ns} {184 ns}
+WaveRestoreZoom {86 ns} {159 ns}
