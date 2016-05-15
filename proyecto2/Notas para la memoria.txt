@@ -4,3 +4,7 @@
 -La memoria va incrementando direcciones ciclo a ciclo y hay que subir el wait en el mismo ciclo
 en el que la memoria te da el dato.
 -El IO te suelta el dato un ciclo antes de que te diga que ya lo tienes.
+Para el optativo
+-----------------------------
+-Hay que hacer que la palabra que pide el DMA a MD se incremente en DMA ya que como no se va a activar burst
+no la va a incrementar la MD.

@@ -150,7 +150,7 @@ addr_MD: reg8 port map (Din => Bus_data(7 downto 0), clk => clk, reset => reset,
  
  DMA_addr_IO <= palabra_inicial_IO(6 downto 0) + cuenta_palabras(6 downto 0); -- dirección para el periferico
 
- palabra_MD <= palabra_inicial_MD; --aquí no sumamos porque ya lo hace el controlador de MD
+ palabra_MD <= palabra_inicial_MD + cuenta_palabras; --aquí no sumamos porque ya lo hace el controlador de MD
  
  DMA_Addr <= "0000000000000000000000"&palabra_MD&"00"; -- Dirección de la MD
  --------------------------------------------------------------------------------------------
