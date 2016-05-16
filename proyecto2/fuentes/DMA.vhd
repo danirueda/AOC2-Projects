@@ -116,7 +116,7 @@ end component;
 
 
 
-signal load_reg_control, load_reg_DMA, count_enable, reset_count, empezar, load_data, update_done, bit7_control_in, fin, L_E, robo: std_logic;
+signal load_reg_control, load_reg_DMA, count_enable, reset_count, empezar, load_data, update_done, bit7_control_in, fin, L_E, robo, DMA_send_data_slave, DMA_send_data_master: std_logic;
 signal Dout_reg_control, Dout_num_palabras, palabra_inicial_MD, cuenta_palabras, palabra_inicial_IO, palabra_MD, control_in:  STD_LOGIC_VECTOR (7 downto 0);
 signal reg_DMA, reg_data_in, reg_datos_DMA : STD_LOGIC_VECTOR (31 downto 0);
 
@@ -168,13 +168,18 @@ fin <= '1' when cuenta_palabras = Dout_num_palabras else '0';
  L_E <= reg_DMA(25); --indica si es lectura (0) o escritura(1) en MD
  robo <= reg_DMA(26); --Damos valor a la señal de robo de ciclo
 
- UC: UC_DMA port map ( clk, reset, empezar, fin, robo, L_E, Bus_Req, IO_sync, update_done, DMA_send_data, DMA_send_addr, DMA_Burst, DMA_wait, reset_count, count_enable, load_data, DMA_MD_RE, DMA_MD_WE, DMA_IO_RE, DMA_IO_WE, DMA_sync);
+ UC: UC_DMA port map ( clk, reset, empezar, fin, robo, L_E, Bus_Req, IO_sync, update_done, DMA_send_data_master, DMA_send_addr, DMA_Burst, DMA_wait, reset_count, count_enable, load_data, DMA_MD_RE, DMA_MD_WE, DMA_IO_RE, DMA_IO_WE, DMA_sync);
  --------------------------------------------------------------------------------------------
   --Salidas de datos
   --salida para la IO  
   DMA_IO_out <= reg_datos_DMA; 
   --salida para el bus
   DMA_bus_out <= 	reg_DMA when (Bus_addr = x"00000200") else reg_datos_DMA;
+
+  -- señal send_data: el dma envía datos al bus si lo ordena su Unidad de control (DMA_send_data_master), o si el Mips se los pide(DMA_send_data_slave)
+ DMA_send_data <= DMA_send_data_slave or DMA_send_data_master;
+ -- si el mips indica la dirección x"00000200" en una operación de lectura hay que mandar el dato
+ DMA_send_data_slave <= '1' when (Bus_addr = x"00000200")and (Bus_RE='1') else '0';
 	
 end Behavioral;
 
