@@ -258,6 +258,7 @@ signal branch_address_in, branch_address_out, branch_address_out_ID, instruction
 signal controlMuxPC: STD_LOGIC_VECTOR (1 downto 0);
 signal error_saltos, error_salto_noSalto, error_noSalto_salto, hayError: std_logic; --errores en el predictor
 signal load_ID_EX, load_EX_MEM : std_logic;
+signal RegWrite_to_WB, Update_Rs: std_logic;
 begin
 pc: reg32 port map (Din => PC_in, clk => clk, reset => reset, load => load_PC, Dout => PC_out);
 ------------------------------------------------------------------------------------
@@ -307,7 +308,7 @@ Banco_IF_ID: Banco_ID port map (IR_in => instruction_in, PC4_in => PC4, clk => c
 ------------------------------------------Etapa ID-------------------------------------------------------------------
 
 Register_bank: BReg PORT MAP (clk => clk, reset => reset, RA => IR_ID(25 downto 21), RB => IR_ID(20 downto 16), RW => RW_WB, BusW => BusW, 
-									RegWrite => RegWrite_WB, BusA => BusA, BusB => BusB, RS => RS_MEM, BusRS => ALU_out_MEM, Update_Rs => Update_Rs_MEM);
+									RegWrite => RegWrite_WB, BusA => BusA, BusB => BusB, RS => RS_MEM, BusRS => ALU_out_MEM, Update_Rs => Update_Rs);
 -------------------------------------------------------------------------------------
 sign_ext: Ext_signo port map (inm => IR_ID(15 downto 0), inm_ext => inm_ext);
 
@@ -385,12 +386,16 @@ riesgo_sw_pre <= '1' when (MEM_STALL = '1' and op_code_MEM = "000111") else '0';
 --Si se activa alguno de los riesgos anteriores se activa el riesgo_bus.
 riesgo_bus <= '1' when (riesgo_lw = '1' or riesgo_sw = '1' or riesgo_lw_pre = '1' or riesgo_sw_pre = '1') else '0';
 
+RegWrite_to_WB <= '0' when (riesgo_bus = '1') else RegWrite_MEM;
+Update_Rs <= '0' when (riesgo_bus = '1') else Update_Rs_MEM;
+
 MD_IO: MD_mas_I_O PORT MAP (CLK => CLK, ADDR => ALU_out_MEM, Din => BusB_MEM, WE => MemWrite_MEM, RE => MemRead_MEM, MEM_STALL => MEM_STALL,
  Dout => Mem_out, reset => reset);
 
-Banco_MEM_WB: Banco_WB PORT MAP ( ALU_out_MEM => ALU_out_MEM, ALU_out_WB => ALU_out_WB, Mem_out => Mem_out, MDR => MDR, clk => clk, reset => reset, load => '1', MemtoReg_MEM => MemtoReg_MEM, RegWrite_MEM => RegWrite_MEM, 
+Banco_MEM_WB: Banco_WB PORT MAP ( ALU_out_MEM => ALU_out_MEM, ALU_out_WB => ALU_out_WB, Mem_out => Mem_out, MDR => MDR, clk => clk, reset => reset, load => '1', MemtoReg_MEM => MemtoReg_MEM, RegWrite_MEM => RegWrite_to_WB, 
 											MemtoReg_WB => MemtoReg_WB, RegWrite_WB => RegWrite_WB, RW_MEM => RW_MEM, RW_WB => RW_WB);
 mux_busW: mux2_1 port map (Din0 => ALU_out_WB, DIn1 => MDR, ctrl => MemtoReg_WB, Dout => busW);
+
 
 --
 --------------------------------------Etapa WB--------------------------------------------------------------------
