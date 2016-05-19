@@ -7,10 +7,6 @@ add wave -noupdate -expand -group {Banco IF/ID} -label IR_ID /testbench/uut/Banc
 add wave -noupdate -group {Banco EX/MEM} -label op_code_EX /testbench/uut/Banco_EX_MEM/op_code_EX
 add wave -noupdate -group {Banco EX/MEM} -label op_code_MEM /testbench/uut/Banco_EX_MEM/op_code_MEM
 add wave -noupdate -label Register_bank/reg_file /testbench/uut/Register_bank/reg_file
-add wave -noupdate -label Update_Rs /testbench/uut/Register_bank/Update_Rs
-add wave -noupdate -label RegWrite_MEM /testbench/uut/Banco_MEM_WB/RegWrite_MEM
-add wave -noupdate -label RegWrite_WB /testbench/uut/Banco_MEM_WB/RegWrite_WB
-add wave -noupdate -label RegWrite /testbench/uut/Register_bank/RegWrite
 add wave -noupdate -label MEM_STALL /testbench/uut/MD_IO/MEM_STALL
 add wave -noupdate -group Bus -color Magenta -label Bus_data /testbench/uut/MD_IO/Controlador_DMA/Bus_data
 add wave -noupdate -group Bus -color {Medium Orchid} -label Bus_addr /testbench/uut/MD_IO/Controlador_DMA/Bus_addr
@@ -48,11 +44,11 @@ add wave -noupdate -group UC_DMA -label count_enable /testbench/uut/MD_IO/Contro
 add wave -noupdate -group UC_DMA -label load_data /testbench/uut/MD_IO/Controlador_DMA/UC/load_data
 add wave -noupdate -group UC_DMA -label reset_count /testbench/uut/MD_IO/Controlador_DMA/UC/reset_count
 add wave -noupdate -group UC_DMA -label update_done /testbench/uut/MD_IO/Controlador_DMA/UC/update_done
-add wave -noupdate -group InfoTransferDMA -label DMA/num_palabras/Dout /testbench/uut/MD_IO/Controlador_DMA/num_palabras/Dout
-add wave -noupdate -group InfoTransferDMA -label addr_IO/Dout /testbench/uut/MD_IO/Controlador_DMA/addr_IO/Dout
-add wave -noupdate -group InfoTransferDMA -label addr_MD/Dout /testbench/uut/MD_IO/Controlador_DMA/addr_MD/Dout
-add wave -noupdate -group InfoTransferDMA -label DMA/cont_palabras/count /testbench/uut/MD_IO/Controlador_DMA/cont_palabras/count
-add wave -noupdate -group InfoTransferDMA -label DMA/control/Dout /testbench/uut/MD_IO/Controlador_DMA/control/Dout
+add wave -noupdate -expand -group InfoTransferDMA -label DMA/num_palabras/Dout /testbench/uut/MD_IO/Controlador_DMA/num_palabras/Dout
+add wave -noupdate -expand -group InfoTransferDMA -label addr_IO/Dout /testbench/uut/MD_IO/Controlador_DMA/addr_IO/Dout
+add wave -noupdate -expand -group InfoTransferDMA -label addr_MD/Dout /testbench/uut/MD_IO/Controlador_DMA/addr_MD/Dout
+add wave -noupdate -expand -group InfoTransferDMA -label DMA/cont_palabras/count /testbench/uut/MD_IO/Controlador_DMA/cont_palabras/count
+add wave -noupdate -expand -group InfoTransferDMA -label DMA/control/Dout /testbench/uut/MD_IO/Controlador_DMA/control/Dout
 add wave -noupdate -group DMA/reg_data -label Dout /testbench/uut/MD_IO/Controlador_DMA/reg_data/Dout
 add wave -noupdate -group DMA/reg_data -label load /testbench/uut/MD_IO/Controlador_DMA/reg_data/load
 add wave -noupdate -expand -group IO -label ADDR /testbench/uut/MD_IO/IO/ADDR
@@ -63,7 +59,7 @@ add wave -noupdate -expand -group IO -label RAM /testbench/uut/MD_IO/IO/RAM
 add wave -noupdate -expand -group IO -label RE /testbench/uut/MD_IO/IO/RE
 add wave -noupdate -expand -group IO -label WE /testbench/uut/MD_IO/IO/WE
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {130 ns} 0}
+WaveRestoreCursors {{Cursor 1} {113 ns} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -79,4 +75,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {1081 ns} {1154 ns}
+WaveRestoreZoom {89 ns} {162 ns}
